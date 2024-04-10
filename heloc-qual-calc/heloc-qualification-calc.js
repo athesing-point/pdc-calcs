@@ -30,3 +30,14 @@ function calculateHELOCQualification() {
 
   return `Congratulations! You qualify for a HELOC of up to $${creditLine.toFixed(2)}.`;
 }
+function updateDTV() {
+  const homeValue = parseFloat(document.querySelector("[data-home-value]").value);
+  const mortgageOwed = parseFloat(document.querySelector("[data-mortgage-owed]").value);
+
+  if (!isNaN(homeValue) && !isNaN(mortgageOwed) && homeValue > 0) {
+    const dtv = (mortgageOwed / homeValue) * 100;
+    document.getElementById("dtv").innerText = `DTV: ${dtv.toFixed(2)}%`;
+  } else {
+    document.getElementById("dtv").innerText = "DTV: N/A";
+  }
+}
