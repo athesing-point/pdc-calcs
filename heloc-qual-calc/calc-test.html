@@ -1,41 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
+<body>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HELOC Qualification Calculator</title>
-    <script src="heloc-qualification-calc.js"></script>
+    <link href="components.css" rel="stylesheet" />
+    <link href="new-point.css" rel="stylesheet" />
   </head>
-  <body>
-    <h1>HELOC Qualification Calculator</h1>
-    <form id="helocForm">
-      <div>
-        <label for="income">Income:</label>
-        <input type="number" id="income" data-income />
+  <div class="calculator-wrap">
+    <div class="calc-col input-col">
+      <div class="form-field-wrapper">
+        <div class="tools-input-label">Current home value:</div>
+        <input class="form-input calc-input_field" name="current home value" calc-input="home_value" />
       </div>
-      <div>
-        <label for="credit-score">Credit Score:</label>
-        <input type="number" id="credit-score" data-credit-score />
+      <div class="form-field-wrapper">
+        <div class="tools-input-label">Mortage outstanding balance:</div>
+        <input class="form-input calc-input_field" name="mortage balance" calc-input="mortage_balance" />
       </div>
-      <div>
-        <label for="home-value">Home Value:</label>
-        <input type="number" id="home-value" data-home-value step="0.01" oninput="updateDTV()" />
+      <div class="form-field-wrapper">
+        <div class="tools-input-label">Credit Score</div>
+        <select class="form-input calc-input_field" calc-input="credit_score" name="credit score">
+          <option value="Select a credit score">Select your credit score</option>
+          <option value="Poor">Poor</option>
+          <option value="Needs Improvement">Needs Improvement</option>
+          <option value="Fair">Fair</option>
+          <option value="Good">Good</option>
+          <option value="Excellent">Excellent</option>
+        </select>
       </div>
-      <div>
-        <label for="mortgage-owed">Mortgage Owed:</label>
-        <input type="number" id="mortgage-owed" data-mortgage-owed step="0.01" oninput="updateDTV()" />
+      <div class="form-field-wrapper">
+        <div class="tools-input-label">Monthly Income</div>
+        <input class="form-input calc-input_field" name="monthly income" calc-input="monthly_income" />
       </div>
-      <button type="button" onclick="displayResult()">Calculate</button>
-    </form>
-    <div id="result"></div>
-    <div id="dtv"></div>
-    <!-- Element to display DTV -->
-
-    <script>
-      function displayResult() {
-        const result = calculateHELOCQualification();
-        document.getElementById("result").innerText = result;
-      }
-    </script>
-  </body>
-</html>
+      <div class="form-field-wrapper">
+        <div class="tools-input-label">Monthly Expenses</div>
+        <input class="form-input calc-input_field" name="monthly expenses" calc-input="monthly_expenses" />
+      </div>
+      <a calc-input="calc_button" aria-label="calculate my estimated HELOC loan value" href="#" class="button is-small fw w-button">Calculate</a>
+      <div>
+        <p class="text-size-xxsmall text-color-graylightestaccessible">
+          Disclaimer: This calculator only provides an estimate of how much you might qualify for with a HELOC. Your exact amount and loan pricing will depend on factors including the lender, type of property and you personal financial profile
+        </p>
+      </div>
+    </div>
+    <div class="calc-col results_col">
+      <div class="tools-input-label">Results:</div>
+      <div class="calc-card_grid">
+        <div id="w-node-a88ab957-ef5c-06e5-ee72-ceed53ac963e-641b4719" class="calc-result_card">
+          <h2 class="heading-xsmall text-wrap-balance">Current LTV<br />(Loan to Value Ratio)</h2>
+          <div class="padding-small"></div>
+          <div class="horizontal-rule"></div>
+          <div class="grouped-spacers">
+            <div class="padding-small"></div>
+            <div class="padding-xxsmall"></div>
+          </div>
+          <div calc-result="ltv" class="heading-huge">67%</div>
+          <div class="padding-xsmall"></div>
+          <div class="padding-small"></div>
+          <p class="text-size-xxsmall text-color-black">
+            Disclaimer: This calculator only provides an estimate of how much you might qualify for with a HELOC. Your exact amount and loan pricing will depend on factors including the lender, type of property and you personal financial profile
+          </p>
+        </div>
+        <div class="calc-result_card">
+          <h2 class="heading-xsmall text-wrap-balance">How much can you borrow?</h2>
+          <div class="padding-small"></div>
+          <div class="horizontal-rule"></div>
+          <div class="grouped-spacers">
+            <div class="padding-small"></div>
+            <div class="padding-xxsmall"></div>
+          </div>
+          <div calc-result="borrow" class="heading-huge">$500k</div>
+          <div class="padding-xsmall"></div>
+          <div class="padding-small"></div>
+          <p class="text-size-xxsmall text-color-black">
+            Disclaimer: This calculator only provides an estimate of how much you might qualify for with a HELOC. Your exact amount and loan pricing will depend on factors including the lender, type of property and you personal financial profile
+          </p>
+        </div>
+        <div id="w-node-_3e0b0b66-c3a7-2516-4641-37c837096b53-641b4719" class="calc-result_card dti-card">
+          <h2 class="heading-xsmall text-wrap-balance vertical-center">DTI<br />(Debt to income)</h2>
+          <div class="vertical-rule"></div>
+          <div>
+            <div calc-result="dti" class="heading-huge">33%</div>
+            <div class="padding-xsmall"></div>
+            <div class="text-size-xxsmall">You might qualify for a home equity line of credit (HELOC)! If you're searching for financing without.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script defer src="heloc-qualification-calc.js"></script>
+</body>
