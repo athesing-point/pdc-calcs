@@ -5,77 +5,63 @@ function calculateHELOCQualification() {
   let mortgageOwed = document.querySelector("[calc-input='mortage_balance']").value;
   let expenses = document.querySelector("[calc-input='monthly_expenses']").value;
 
-  console.log("Initial values:", { income, creditScoreOption, homeValue, mortgageOwed, expenses });
-
   income = parseInt(income, 10);
   homeValue = parseFloat(homeValue);
   mortgageOwed = parseFloat(mortgageOwed);
+  expenses = parseInt(expenses, 10);
 
-  console.log("Parsed values:", { income, homeValue, mortgageOwed });
+  let dti = calculateDTI(income, expenses);
+  let ltv = Math.round((mortgageOwed / homeValue) * 100);
 
-  // Map credit score descriptions to numeric values
   let creditScore = mapCreditScore(creditScoreOption);
-  console.log("Mapped credit score:", creditScore);
-
-  let loanToValueRatio = (mortgageOwed / homeValue) * 100;
   let creditLine = 0;
 
-  console.log("Loan to Value Ratio:", loanToValueRatio);
-
-  if (creditScore >= 700 && loanToValueRatio <= 80) {
-    // High credit score and low loan to value ratio
+  if (creditScore >= 700 && ltv <= 80) {
     creditLine = homeValue * 0.85 - mortgageOwed;
-  } else if (creditScore >= 650 && loanToValueRatio <= 85) {
-    // Moderate credit score and moderate loan to value ratio
+  } else if (creditScore >= 650 && ltv <= 85) {
     creditLine = homeValue * 0.8 - mortgageOwed;
-  } else if (creditScore < 650 || loanToValueRatio > 85) {
-    // Low credit score or high loan to value ratio
-    console.log("Qualification status: Does not qualify");
+  } else if (creditScore < 650 || ltv > 85) {
+    alert("Sorry, you do not qualify.");
     return {
       heloc: "Unfortunately, you do not qualify for a HELOC with our institution.",
-      dti: `DTI: N/A`, // Assuming calculateDTI() returns a numeric DTI value
-      ltv: `LTV: N/A`, // Assuming calculateLTV() returns a numeric LTV value
+      dti: Math.round(dti) + "%",
+      ltv: Math.round(ltv) + "%",
     };
   }
 
-  console.log("Initial credit line:", creditLine);
-
   if (income < 50000) {
-    // Adjusting credit line for lower income
     creditLine *= 0.9;
-    console.log("Adjusted credit line for income < 50000:", creditLine);
   }
 
+  let borrowAmount = Math.floor((homeValue * (ltv / 100) * 0.85) / 1000) * 1000;
+
   return {
-    heloc: `Congratulations! You qualify for a HELOC of up to $${creditLine.toFixed(2)}.`,
-    dti: `DTI: ${calculateDTI().toFixed(2)}%`, // Assuming calculateDTI() returns a numeric DTI value
-    ltv: `LTV: ${calculateLTV().toFixed(2)}%`, // Assuming calculateLTV() returns a numeric LTV value
+    heloc: `You qualify for a HELOC of up to $${Math.round(creditLine)}.`,
+    dti: Math.round(dti) + "%",
+    ltv: Math.round(ltv) + "%",
+    borrow: `$${borrowAmount}k`,
   };
 }
+
 function mapCreditScore(option) {
   switch (option) {
     case "Poor":
-      return 580; // Example value
+      return 580;
     case "Needs Improvement":
-      return 620; // Example value
+      return 620;
     case "Fair":
-      return 660; // Example value
+      return 660;
     case "Good":
-      return 700; // Example value
+      return 700;
     case "Excellent":
-      return 740; // Example value
+      return 740;
     default:
-      return 0; // Fallback if no option is selected
+      return 0;
   }
 }
-function calculateDTI() {
-  let income = parseInt(document.querySelector("[calc-input='monthly_income']").value, 10);
-  let expenses = parseInt(document.querySelector("[calc-input='monthly_expenses']").value, 10);
-
-  if (income === 0) return 0; // Prevent division by zero
-
-  let dti = (expenses / income) * 100;
-  return dti;
+function calculateDTI(income, expenses) {
+  if (income === 0) return 0;
+  return Math.round((expenses / income) * 100);
 }
 function displayResult() {
   const results = calculateHELOCQualification();
@@ -90,27 +76,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const calcButton = document.querySelector('[calc-input="calc_button"]');
   if (calcButton) {
     calcButton.addEventListener("click", displayResult);
-  } else {
-    console.error("Calculate button not found");
   }
 });
-document.querySelectorAll(".calc-input_field").forEach((input) => {
+document.querySelectorAll(".calc-input_field[type='text']").forEach((input) => {
   input.addEventListener("input", () => {
-    // Store the current cursor position
     const cursorPosition = input.selectionStart;
-
-    // Remove existing commas for clean numeric input
     let numericValue = input.value.replace(/,/g, "");
-
-    // Format with commas
     let formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-    // Update the input value with formatted number
     input.value = formattedValue;
-
-    // Restore the cursor position
     input.selectionStart = input.selectionEnd = cursorPosition + (formattedValue.length - numericValue.length);
-
-    console.log("Formatted input value:", input.value);
   });
 });
