@@ -1,3 +1,4 @@
+//Public
 function calculateHELOCQualification() {
   // Retrieve and clean input values from the form
   let income = document.querySelector("[calc-input='monthly_income']").value.replace(/,/g, "");
