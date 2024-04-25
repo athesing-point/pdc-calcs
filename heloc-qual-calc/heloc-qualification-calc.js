@@ -1,45 +1,64 @@
 function calculateHELOCQualification() {
-  let income = document.querySelector("[calc-input='monthly_income']").value;
+  let income = document.querySelector("[calc-input='monthly_income']").value.replace(/,/g, "");
   let creditScoreOption = document.querySelector("[calc-input='credit_score']").value;
-  let homeValue = document.querySelector("[calc-input='home_value']").value;
-  let mortgageOwed = document.querySelector("[calc-input='mortage_balance']").value;
-  let expenses = document.querySelector("[calc-input='monthly_expenses']").value;
+  let homeValue = document.querySelector("[calc-input='home_value']").value.replace(/,/g, "");
+  let mortgageOwed = document.querySelector("[calc-input='mortage_balance']").value.replace(/,/g, "");
+  let expenses = document.querySelector("[calc-input='monthly_expenses']").value.replace(/,/g, "");
+
+  console.log("Initial Values:", { income, creditScoreOption, homeValue, mortgageOwed, expenses });
 
   income = parseInt(income, 10);
   homeValue = parseFloat(homeValue);
   mortgageOwed = parseFloat(mortgageOwed);
   expenses = parseInt(expenses, 10);
 
+  console.log("Parsed Values:", { income, homeValue, mortgageOwed, expenses });
+
   let dti = calculateDTI(income, expenses);
   let ltv = Math.round((mortgageOwed / homeValue) * 100);
 
-  let creditScore = mapCreditScore(creditScoreOption);
+  console.log("Calculated DTI:", dti);
+  console.log("Calculated LTV:", ltv);
+
+  let availableEquity = homeValue - mortgageOwed;
+  console.log("Available Equity:", availableEquity);
+
   let creditLine = 0;
-
-  if (creditScore >= 700 && ltv <= 80) {
-    creditLine = homeValue * 0.85 - mortgageOwed;
-  } else if (creditScore >= 650 && ltv <= 85) {
-    creditLine = homeValue * 0.8 - mortgageOwed;
-  } else if (creditScore < 650 || ltv > 85) {
-    alert("Sorry, you do not qualify.");
-    return {
-      heloc: "Unfortunately, you do not qualify for a HELOC with our institution.",
-      dti: Math.round(dti) + "%",
-      ltv: Math.round(ltv) + "%",
-    };
+  creditScoreOption = creditScoreOption.trim().toLowerCase();
+  switch (creditScoreOption) {
+    case "excellent":
+      creditLine = availableEquity * 0.6;
+      break;
+    case "good":
+      creditLine = availableEquity * 0.55;
+      break;
+    case "fair":
+      creditLine = availableEquity * 0.5;
+      break;
+    case "needs improvement":
+      creditLine = availableEquity * 0.45;
+      break;
+    case "poor":
+      creditLine = availableEquity * 0.4;
+      break;
+    default:
+      alert("Invalid credit score.");
+      return {
+        heloc: "Invalid credit score provided.",
+        dti: Math.round(dti) + "%",
+        ltv: Math.round(ltv) + "%",
+      };
   }
 
-  if (income < 50000) {
-    creditLine *= 0.9;
-  }
+  console.log("Credit Line based on Credit Score:", creditLine);
 
-  let borrowAmount = Math.floor((homeValue * (ltv / 100) * 0.85) / 1000) * 1000;
+  let borrowAmount = Math.floor(creditLine / 1000) * 1000;
+  console.log("Final Borrow Amount:", borrowAmount);
 
   return {
-    heloc: `You qualify for a HELOC of up to $${Math.round(creditLine)}.`,
+    borrow: `$${borrowAmount / 1000}k`,
     dti: Math.round(dti) + "%",
     ltv: Math.round(ltv) + "%",
-    borrow: `$${borrowAmount}k`,
   };
 }
 
@@ -65,8 +84,10 @@ function calculateDTI(income, expenses) {
 }
 function displayResult() {
   const results = calculateHELOCQualification();
+  console.log(results); // Log the results to see what is being returned from the calculation.
   document.querySelectorAll("[calc-result]").forEach((element) => {
     const resultType = element.getAttribute("calc-result");
+    console.log(resultType, results[resultType]); // Log each result type and corresponding value.
     if (results[resultType]) {
       element.innerText = results[resultType];
     }
