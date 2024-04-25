@@ -1,30 +1,40 @@
 function calculateHELOCQualification() {
+  // Retrieve and clean input values from the form
   let income = document.querySelector("[calc-input='monthly_income']").value.replace(/,/g, "");
   let creditScoreOption = document.querySelector("[calc-input='credit_score']").value;
   let homeValue = document.querySelector("[calc-input='home_value']").value.replace(/,/g, "");
   let mortgageOwed = document.querySelector("[calc-input='mortage_balance']").value.replace(/,/g, "");
   let expenses = document.querySelector("[calc-input='monthly_expenses']").value.replace(/,/g, "");
 
+  // Log initial values for debugging
   console.log("Initial Values:", { income, creditScoreOption, homeValue, mortgageOwed, expenses });
 
+  // Convert string input values to appropriate numerical types
   income = parseInt(income, 10);
   homeValue = parseFloat(homeValue);
   mortgageOwed = parseFloat(mortgageOwed);
   expenses = parseInt(expenses, 10);
 
+  // Log parsed numerical values for debugging
   console.log("Parsed Values:", { income, homeValue, mortgageOwed, expenses });
 
+  // Calculate Debt-to-Income Ratio
   let dti = calculateDTI(income, expenses);
+  // Calculate Loan-to-Value Ratio and round it to the nearest whole number
   let ltv = Math.round((mortgageOwed / homeValue) * 100);
 
+  // Log calculated ratios for debugging
   console.log("Calculated DTI:", dti);
   console.log("Calculated LTV:", ltv);
 
+  // Calculate available equity by subtracting the mortgage owed from the home value
   let availableEquity = homeValue - mortgageOwed;
   console.log("Available Equity:", availableEquity);
 
   let creditLine = 0;
+  // Normalize credit score input to lower case for case-insensitive comparison
   creditScoreOption = creditScoreOption.trim().toLowerCase();
+  // Determine credit line based on credit score using a switch statement
   switch (creditScoreOption) {
     case "excellent":
       creditLine = availableEquity * 0.6;
@@ -42,6 +52,7 @@ function calculateHELOCQualification() {
       creditLine = availableEquity * 0.4;
       break;
     default:
+      // Alert user and return error message if credit score is invalid
       alert("Invalid credit score.");
       return {
         heloc: "Invalid credit score provided.",
@@ -50,11 +61,14 @@ function calculateHELOCQualification() {
       };
   }
 
+  // Log the determined credit line for debugging
   console.log("Credit Line based on Credit Score:", creditLine);
 
+  // Calculate the final borrow amount, rounding down to the nearest thousand
   let borrowAmount = Math.floor(creditLine / 1000) * 1000;
   console.log("Final Borrow Amount:", borrowAmount);
 
+  // Return the calculated borrow amount, DTI, and LTV as formatted strings
   return {
     borrow: `$${borrowAmount / 1000}k`,
     dti: Math.round(dti) + "%",
@@ -63,6 +77,7 @@ function calculateHELOCQualification() {
 }
 
 function mapCreditScore(option) {
+  // Map human-readable credit score options to numerical values
   switch (option) {
     case "Poor":
       return 580;
@@ -79,12 +94,16 @@ function mapCreditScore(option) {
   }
 }
 function calculateDTI(income, expenses) {
+  // Return 0 if income is 0 to avoid division by zero
   if (income === 0) return 0;
+  // Calculate and return Debt-to-Income ratio as a percentage
   return Math.round((expenses / income) * 100);
 }
 function displayResult() {
+  // Calculate HELOC qualification results and log them
   const results = calculateHELOCQualification();
   console.log(results); // Log the results to see what is being returned from the calculation.
+  // Display each result in the corresponding HTML element
   document.querySelectorAll("[calc-result]").forEach((element) => {
     const resultType = element.getAttribute("calc-result");
     console.log(resultType, results[resultType]); // Log each result type and corresponding value.
@@ -94,12 +113,14 @@ function displayResult() {
   });
 }
 document.addEventListener("DOMContentLoaded", function () {
+  // Set up event listener for the calculate button
   const calcButton = document.querySelector('[calc-input="calc_button"]');
   if (calcButton) {
     calcButton.addEventListener("click", displayResult);
   }
 });
 document.querySelectorAll(".calc-input_field[type='text']").forEach((input) => {
+  // Format input fields to display numbers with commas
   input.addEventListener("input", () => {
     const cursorPosition = input.selectionStart;
     let numericValue = input.value.replace(/,/g, "");
