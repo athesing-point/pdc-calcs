@@ -38,6 +38,11 @@ function calculateHELOCQualification() {
   // Determine credit line based on credit score using a switch statement
   let texturedCard = document.querySelector(".textured-card");
   let helocNA = document.querySelector(".heloc-na");
+
+  // Reset display properties to default each time calculation is performed
+  if (texturedCard) texturedCard.style.display = "block"; // Assuming default is 'block'
+  if (helocNA) helocNA.style.display = "none"; // Assuming default is 'none'
+
   switch (creditScoreOption) {
     case "excellent":
       creditLine = availableEquity * 0.6;
@@ -59,8 +64,7 @@ function calculateHELOCQualification() {
         ltv: Math.round(ltv) + "%",
       };
     default:
-      // Alert user and return error message if credit score is invalid
-      alert("Invalid credit score.");
+      console.log("Invalid credit score.");
       return {
         heloc: "Invalid credit score provided.",
         dti: Math.round(dti) + "%",
