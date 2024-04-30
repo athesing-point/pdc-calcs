@@ -36,6 +36,8 @@ function calculateHELOCQualification() {
   // Normalize credit score input to lower case for case-insensitive comparison
   creditScoreOption = creditScoreOption.trim().toLowerCase();
   // Determine credit line based on credit score using a switch statement
+  let texturedCard = document.querySelector(".textured-card");
+  let helocNA = document.querySelector(".heloc-na");
   switch (creditScoreOption) {
     case "excellent":
       creditLine = availableEquity * 0.6;
@@ -46,12 +48,16 @@ function calculateHELOCQualification() {
     case "fair":
       creditLine = availableEquity * 0.5;
       break;
+    case "improving":
     case "needs improvement":
-      creditLine = availableEquity * 0.45;
-      break;
     case "poor":
-      creditLine = availableEquity * 0.4;
-      break;
+      if (texturedCard) texturedCard.style.display = "none";
+      if (helocNA) helocNA.style.display = "flex";
+      return {
+        heloc: "Not applicable",
+        dti: Math.round(dti) + "%",
+        ltv: Math.round(ltv) + "%",
+      };
     default:
       // Alert user and return error message if credit score is invalid
       alert("Invalid credit score.");
