@@ -120,13 +120,13 @@ document.addEventListener("DOMContentLoaded", function () {
     calcButton.addEventListener("click", displayResult);
   }
 });
-document.querySelectorAll(".calc-input_field[type='text']").forEach((input) => {
-  // Format input fields to display numbers with commas
+document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
   input.addEventListener("input", () => {
-    const cursorPosition = input.selectionStart;
-    let numericValue = input.value.replace(/,/g, "");
+    // Remove any existing commas and non-numeric characters except for numbers
+    let numericValue = input.value.replace(/[^0-9]/g, "");
+    // Insert commas for thousands, millions, etc.
     let formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    // Update the input field with the formatted value
     input.value = formattedValue;
-    input.selectionStart = input.selectionEnd = cursorPosition + (formattedValue.length - numericValue.length);
   });
 });
