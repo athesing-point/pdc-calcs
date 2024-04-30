@@ -44,6 +44,7 @@ function calculateHELOCQualification() {
   if (helocNA) helocNA.style.display = "none"; // Assuming default is 'none'
 
   let isApproved = true; // Initialize the flag as true, assuming approval unless conditions fail
+  let showExitPopup = false; // Flag to control the exit popup display
 
   switch (creditScoreOption) {
     case "excellent":
@@ -61,11 +62,13 @@ function calculateHELOCQualification() {
       if (texturedCard) texturedCard.style.display = "none";
       if (helocNA) helocNA.style.display = "flex";
       isApproved = false; // Set flag to false as the user is not approved
+      showExitPopup = true; // Set the exit popup flag to true
       return {
         heloc: "Not applicable",
         dti: Math.round(dti) + "%",
         ltv: Math.round(ltv) + "%",
-        approved: isApproved, // Include the approval status in the return object
+        approved: isApproved,
+        showExitPopup: showExitPopup, // Include this flag in the return object
       };
     default:
       console.log("Invalid credit score.");
@@ -151,6 +154,15 @@ function displayResult() {
     console.log("Color set to #01679A for element with ID 'update-color'.");
   } else {
     console.log("Element with ID 'update-color' not found.");
+  }
+
+  if (results.showExitPopup) {
+    document.addEventListener("mousemove", function (event) {
+      if (event.clientY <= 50) {
+        // Check if the mouse is within 50 pixels of the top of the page
+        document.querySelector(".section-exit-popup").style.display = "flex"; // Display the exit popup
+      }
+    });
   }
 }
 
