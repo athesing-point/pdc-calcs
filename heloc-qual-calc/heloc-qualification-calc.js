@@ -43,6 +43,8 @@ function calculateHELOCQualification() {
   if (texturedCard) texturedCard.style.display = "block"; // Assuming default is 'block'
   if (helocNA) helocNA.style.display = "none"; // Assuming default is 'none'
 
+  let isApproved = true; // Initialize the flag as true, assuming approval unless conditions fail
+
   switch (creditScoreOption) {
     case "excellent":
       creditLine = availableEquity * 0.6;
@@ -58,17 +60,21 @@ function calculateHELOCQualification() {
     case "poor":
       if (texturedCard) texturedCard.style.display = "none";
       if (helocNA) helocNA.style.display = "flex";
+      isApproved = false; // Set flag to false as the user is not approved
       return {
         heloc: "Not applicable",
         dti: Math.round(dti) + "%",
         ltv: Math.round(ltv) + "%",
+        approved: isApproved, // Include the approval status in the return object
       };
     default:
       console.log("Invalid credit score.");
+      isApproved = false; // Set flag to false due to invalid input
       return {
         heloc: "Invalid credit score provided.",
         dti: Math.round(dti) + "%",
         ltv: Math.round(ltv) + "%",
+        approved: isApproved, // Include the approval status in the return object
       };
   }
 
@@ -87,6 +93,7 @@ function calculateHELOCQualification() {
     borrow: `$${borrowAmount / 1000}k`,
     dti: Math.round(dti) + "%",
     ltv: Math.round(ltv) + "%",
+    approved: isApproved, // Include the approval status in the return object
   };
 }
 
