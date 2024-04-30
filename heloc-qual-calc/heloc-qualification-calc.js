@@ -69,6 +69,9 @@ function calculateHELOCQualification() {
   let borrowAmount = Math.floor(creditLine / 1000) * 1000;
   console.log("Final Borrow Amount:", borrowAmount);
 
+  // Cap the borrow amount at $500,000
+  borrowAmount = Math.min(borrowAmount, 500000);
+  console.log("Capped Borrow Amount:", borrowAmount);
   // Return the calculated borrow amount, DTI, and LTV as formatted strings
   return {
     borrow: `$${borrowAmount / 1000}k`,
@@ -81,15 +84,17 @@ function mapCreditScore(option) {
   // Map human-readable credit score options to numerical values
   switch (option) {
     case "Poor":
-      return 580;
+      return 500;
     case "Needs Improvement":
-      return 620;
+      return 549;
+    case "Improving":
+      return 599;
     case "Fair":
-      return 660;
+      return 679;
     case "Good":
-      return 700;
+      return 739;
     case "Excellent":
-      return 740;
+      return 800;
     default:
       return 0;
   }
@@ -100,19 +105,69 @@ function calculateDTI(income, expenses) {
   // Calculate and return Debt-to-Income ratio as a percentage
   return Math.round((expenses / income) * 100);
 }
-function displayResult() {
-  // Calculate HELOC qualification results and log them
-  const results = calculateHELOCQualification();
-  console.log(results); // Log the results to see what is being returned from the calculation.
-  // Display each result in the corresponding HTML element
-  document.querySelectorAll("[calc-result]").forEach((element) => {
-    const resultType = element.getAttribute("calc-result");
-    console.log(resultType, results[resultType]); // Log each result type and corresponding value.
-    if (results[resultType]) {
-      element.innerText = results[resultType];
+// function displayResult() {
+//   // Calculate HELOC qualification results and log them
+//   const results = calculateHELOCQualification();
+//   console.log(results); // Log the results to see what is being returned from the calculation.
+//   // Display each result in the corresponding HTML element
+//   document.querySelectorAll("[calc-result]").forEach((element) => {
+//     const resultType = element.getAttribute("calc-result");
+//     console.log(resultType, results[resultType]); // Log each result type and corresponding value.
+//     if (results[resultType]) {
+//       element.innerText = results[resultType];
+//     }
+//   });
+
+//   // Find the element with 'calc-card' and 'textured-card' and add the 'calc-result' class
+//   const targetElement = document.querySelector('.calc-card.textured-card');
+//   if (targetElement) {
+//     targetElement.classList.add('calc-result'); // Add 'calc-result' class to the element
+//   }
+
+//   // Find the element with ID 'update-color' and change its text color to '#01679A'
+//   const colorElement = document.getElementById('update-color');
+//   if (colorElement) {
+//     colorElement.style.color = '#01679A'; // Set the text color
+//   }
+// }
+document.addEventListener("DOMContentLoaded", function () {
+  function displayResult() {
+    // Calculate HELOC qualification results and log them
+    const results = calculateHELOCQualification();
+    console.log(results); // Log the results to see what is being returned from the calculation.
+
+    // Display each result in the corresponding HTML element
+    document.querySelectorAll("[calc-result]").forEach((element) => {
+      const resultType = element.getAttribute("calc-result");
+      console.log(resultType, results[resultType]); // Log each result type and corresponding value.
+      if (results[resultType]) {
+        element.innerText = results[resultType];
+      }
+    });
+
+    // Find the element with 'calc-card' and 'textured-card' and add the 'calc-result' class
+    const targetElement = document.querySelector(".calc-card.textured-card");
+    if (targetElement) {
+      targetElement.classList.add("calc-result"); // Add 'calc-result' class to the element
+      console.log("Class 'calc-result' added to the element.");
     }
-  });
-}
+
+    // Find the element with ID 'update-color' and change its text color to '#01679A'
+    const colorElement = document.getElementById("update-color");
+    if (colorElement) {
+      colorElement.style.color = "#01679A"; // Set the text color
+      console.log("Color set to #01679A for element with ID 'update-color'.");
+    } else {
+      console.log("Element with ID 'update-color' not found.");
+    }
+  }
+
+  // Set up event listener for the calculate button
+  const calcButton = document.querySelector('[calc-input="calc_button"]');
+  if (calcButton) {
+    calcButton.addEventListener("click", displayResult);
+  }
+});
 document.addEventListener("DOMContentLoaded", function () {
   // Set up event listener for the calculate button
   const calcButton = document.querySelector('[calc-input="calc_button"]');
