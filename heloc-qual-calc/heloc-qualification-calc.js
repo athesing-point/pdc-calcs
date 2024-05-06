@@ -21,15 +21,15 @@ function mapCreditScore(option) {
 }
 
 function calculateDTI(income, expenses) {
-  // Return 0 if income is 0 to avoid division by zero
-  if (income === 0) return 0;
-  // Calculate and return Debt-to-Income ratio as a percentage
-  return Math.round((expenses / income) * 100);
+  if (income === 0) return 0; // Return 0 if income is 0 to avoid division by zero
+  let dti = Math.round((expenses / income) * 100);
+  return isNaN(dti) ? 0 : dti; // Check for NaN and default to 0 if true
 }
 
 function calculateLTV(mortgageOwed, homeValue) {
-  // Calculate Loan-to-Value Ratio and round it to the nearest whole number
-  return Math.round((mortgageOwed / homeValue) * 100);
+  if (homeValue === 0) return 0; // Return 0 if homeValue is 0 to avoid division by zero
+  let ltv = Math.round((mortgageOwed / homeValue) * 100);
+  return isNaN(ltv) ? 0 : ltv; // Check for NaN and default to 0 if true
 }
 
 function calculateAvailableEquity(homeValue, mortgageOwed) {
@@ -66,6 +66,12 @@ function calculateHELOCQualification() {
   const homeValue = parseFloat(document.querySelector("[calc-input='home_value']").value.replace(/,/g, ""));
   const mortgageOwed = parseFloat(document.querySelector("[calc-input='mortage_balance']").value.replace(/,/g, ""));
   const expenses = parseInt(document.querySelector("[calc-input='monthly_expenses']").value.replace(/,/g, ""), 10);
+
+  // Check if required fields are filled
+  if (!homeValue || !mortgageOwed || !creditScoreOption) {
+    console.log("Required fields are missing.");
+    return; // Exit the function if any required field is not filled
+  }
 
   // Log initial values for debugging
   console.log("Initial Values:", { income, creditScoreOption, homeValue, mortgageOwed, expenses });
@@ -169,186 +175,3 @@ document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
     input.value = formattedValue;
   });
 });
-
-// // Utility functions
-// function formatCurrency(value) {
-//   return `$${(value / 1000).toFixed(0)}k`;
-// }
-
-// function formatPercentage(value) {
-//   return `${Math.round(value)}%`;
-// }
-
-// function mapCreditScore(option) {
-//   // Map human-readable credit score options to numerical values
-//   const creditScoreMap = {
-//     "Poor": 500,
-//     "Needs Improvement": 549,
-//     "Improving": 599,
-//     "Fair": 679,
-//     "Good": 739,
-//     "Excellent": 800,
-//   };
-//   return creditScoreMap[option] || 0;
-// }
-
-// function calculateDTI(income, expenses) {
-//   // Return 0 if income is 0 to avoid division by zero
-//   if (income === 0) return 0;
-//   // Calculate and return Debt-to-Income ratio as a percentage
-//   return Math.round((expenses / income) * 100);
-// }
-
-// function calculateLTV(mortgageOwed, homeValue) {
-//   // Calculate Loan-to-Value Ratio and round it to the nearest whole number
-//   return Math.round((mortgageOwed / homeValue) * 100);
-// }
-
-// function calculateAvailableEquity(homeValue, mortgageOwed) {
-//   // Calculate available equity by subtracting the mortgage owed from the home value
-//   return homeValue - mortgageOwed;
-// }
-
-// function calculateCreditLine(availableEquity, creditScoreOption) {
-//   // Determine credit line based on credit score using a switch statement
-//   switch (creditScoreOption.trim().toLowerCase()) {
-//     case "excellent":
-//       return Math.floor(availableEquity * 0.6);
-//     case "good":
-//       return Math.floor(availableEquity * 0.55);
-//     case "fair":
-//       return Math.floor(availableEquity * 0.5);
-//     default:
-//       return 0;
-//   }
-// }
-
-// function calculateBorrowAmount(creditLine) {
-//   // Calculate the final borrow amount, rounding down to the nearest thousand
-//   let borrowAmount = Math.floor(creditLine / 1000) * 1000;
-//   // Cap the borrow amount at $500,000
-//   return Math.min(borrowAmount, 500000);
-// }
-
-// // Main function
-// function calculateHELOCQualification() {
-//   // Retrieve and clean input values from the form
-//   const income = parseInt(document.querySelector("[calc-input='monthly_income']").value.replace(/,/g, ""), 10);
-//   const creditScoreOption = document.querySelector("[calc-input='credit_score']").value;
-//   const homeValue = parseFloat(document.querySelector("[calc-input='home_value']").value.replace(/,/g, ""));
-//   const mortgageOwed = parseFloat(document.querySelector("[calc-input='mortage_balance']").value.replace(/,/g, ""));
-//   const expenses = parseInt(document.querySelector("[calc-input='monthly_expenses']").value.replace(/,/g, ""), 10);
-
-//   // Log initial values for debugging
-//   console.log("Initial Values:", { income, creditScoreOption, homeValue, mortgageOwed, expenses });
-
-//   // Calculate derived values
-//   const dti = calculateDTI(income, expenses);
-//   const ltv = calculateLTV(mortgageOwed, homeValue);
-//   const availableEquity = calculateAvailableEquity(homeValue, mortgageOwed);
-//   const creditLine = calculateCreditLine(availableEquity, creditScoreOption);
-//   const borrowAmount = calculateBorrowAmount(creditLine);
-
-//   // Log calculated values for debugging
-//   console.log("Calculated DTI:", dti);
-//   console.log("Calculated LTV:", ltv);
-//   console.log("Available Equity:", availableEquity);
-//   console.log("Credit Line based on Credit Score:", creditLine);
-//   console.log("Final Borrow Amount:", borrowAmount);
-
-//   // Determine approval status and exit popup display
-//   let isApproved = true;
-//   let showExitPopup = false;
-//   const texturedCard = document.querySelector(".textured-card");
-//   const helocNA = document.querySelector(".calc-card-na");
-//   const naGraphic = document.getElementById("na-graphic");
-
-//   // Reset display properties to default each time calculation is performed
-//   if (texturedCard) texturedCard.style.display = "block";
-//   if (helocNA) helocNA.style.display = "none";
-//   if (naGraphic) naGraphic.style.display = "none";
-
-//   switch (creditScoreOption.trim().toLowerCase()) {
-//     case "improving":
-//     case "needs improvement":
-//     case "poor":
-//       if (texturedCard) texturedCard.style.display = "none";
-//       if (helocNA) {
-//         helocNA.style.display = "flex";
-//         if (naGraphic) naGraphic.style.display = "block";
-//       }
-//       isApproved = false;
-//       showExitPopup = true;
-//       break;
-//     default:
-//       if (mapCreditScore(creditScoreOption) === 0) {
-//         console.log("Invalid credit score.");
-//         isApproved = false;
-//       }
-//   }
-
-//   // Return the calculated results
-//   return {
-//     borrow: formatCurrency(borrowAmount),
-//     dti: formatPercentage(dti),
-//     ltv: formatPercentage(ltv),
-//     approved: isApproved,
-//     showExitPopup: showExitPopup,
-//   };
-// }
-
-// // Set up event listener for the calculate button
-// document.addEventListener("DOMContentLoaded", () => {
-//   const calcButton = document.querySelector('[calc-input="calc_button"]');
-//   if (calcButton) {
-//     calcButton.addEventListener("click", () => {
-//       const results = calculateHELOCQualification();
-//       console.log(results);
-
-//       // Display each result in the corresponding HTML element
-//       document.querySelectorAll("[calc-result]").forEach((element) => {
-//         const resultType = element.getAttribute("calc-result");
-//         console.log(resultType, results[resultType]);
-//         if (results[resultType]) {
-//           element.innerText = results[resultType];
-//         }
-//       });
-
-//       // Find the element with 'calc-card' and 'textured-card' and add the 'calc-result' class
-//       const targetElement = document.querySelector(".calc-card.textured-card");
-//       if (targetElement) {
-//         targetElement.classList.add("calc-result");
-//         console.log("Class 'calc-result' added to the element.");
-//       }
-
-//       // Find the element with ID 'update-color' and change its text color to '#01679A'
-//       const colorElement = document.getElementById("update-color");
-//       if (colorElement) {
-//         colorElement.style.color = "#01679A";
-//         console.log("Color set to #01679A for element with ID 'update-color'.");
-//       } else {
-//         console.log("Element with ID 'update-color' not found.");
-//       }
-
-//       if (results.showExitPopup) {
-//         document.addEventListener("mousemove", (event) => {
-//           if (event.clientY <= 50) {
-//             document.querySelector(".section-exit-popup").style.display = "flex";
-//           }
-//         });
-//       }
-//     });
-//   }
-// });
-
-// // Format input fields with commas
-// document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
-//   input.addEventListener("input", () => {
-//     // Remove any existing commas and non-numeric characters except for numbers
-//     let numericValue = input.value.replace(/[^0-9]/g, "");
-//     // Insert commas for thousands, millions, etc.
-//     let formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-//     // Update the input field with the formatted value
-//     input.value = formattedValue;
-//   });
-// });
