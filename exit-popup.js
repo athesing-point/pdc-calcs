@@ -38,11 +38,37 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Detect mouse movement towards the address bar to trigger the popup
+  // Existing desktop functionality with mouseleave
   document.addEventListener("mouseleave", function (event) {
     if (event.clientY <= 0 && localStorage.getItem("popupDismissed") !== "true") {
-      // Checks if the mouse leaves through the top of the viewport and popup not dismissed
-      section.style.display = "flex"; // Ensure this is the correct element to display
+      section.style.display = "flex";
+      setTimeout(() => {
+        exitModal.style.transform = "translateY(-10px)";
+        exitModal.style.opacity = "1";
+        background.style.opacity = "1";
+      }, 25);
+    }
+  });
+
+  // Mobile-specific functionality
+  // Detect Scroll Up at the Top of the Page for mobile
+  document.addEventListener("touchmove", function (event) {
+    var currentScroll = window.scrollY || document.documentElement.scrollTop;
+    if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY) {
+      // User is trying to scroll up at the top of the page
+      section.style.display = "flex";
+      setTimeout(() => {
+        exitModal.style.transform = "translateY(-10px)";
+        exitModal.style.opacity = "1";
+        background.style.opacity = "1";
+      }, 25);
+    }
+  });
+
+  // Use the Visibility Change Event for mobile
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden" && localStorage.getItem("popupDismissed") !== "true") {
+      section.style.display = "flex";
       setTimeout(() => {
         exitModal.style.transform = "translateY(-10px)";
         exitModal.style.opacity = "1";
