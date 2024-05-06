@@ -38,15 +38,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Function to show the popup / options on transition
+  function showPopup() {
+    section.style.display = "flex";
+    setTimeout(() => {
+      exitModal.style.transform = "translateY(0px)"; // Starting value is set in CSS on component in PDC.
+      exitModal.style.opacity = "1";
+      background.style.opacity = "1";
+    }, 25);
+  }
+
   // Existing desktop functionality with mouseleave
   document.addEventListener("mouseleave", function (event) {
     if (event.clientY <= 0 && localStorage.getItem("popupDismissed") !== "true") {
-      section.style.display = "flex";
-      setTimeout(() => {
-        exitModal.style.transform = "translateY(-10px)";
-        exitModal.style.opacity = "1";
-        background.style.opacity = "1";
-      }, 25);
+      showPopup();
     }
   });
 
@@ -55,25 +60,14 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("touchmove", function (event) {
     var currentScroll = window.scrollY || document.documentElement.scrollTop;
     if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY) {
-      // User is trying to scroll up at the top of the page
-      section.style.display = "flex";
-      setTimeout(() => {
-        exitModal.style.transform = "translateY(-10px)";
-        exitModal.style.opacity = "1";
-        background.style.opacity = "1";
-      }, 25);
+      showPopup();
     }
   });
 
   // Use the Visibility Change Event for mobile
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "hidden" && localStorage.getItem("popupDismissed") !== "true") {
-      section.style.display = "flex";
-      setTimeout(() => {
-        exitModal.style.transform = "translateY(-10px)";
-        exitModal.style.opacity = "1";
-        background.style.opacity = "1";
-      }, 25);
+      showPopup();
     }
   });
 });
