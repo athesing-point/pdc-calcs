@@ -17,11 +17,11 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
       section.style.display = "none";
     }, 1500); // Assuming the transition duration to zero opacity is 1.5 seconds
-    localStorage.setItem("popupDismissed", "true"); // Store dismissal in local storage
+    localStorage.setItem("exitPopupDismissed", "true"); // Store dismissal in local storage
   }
 
   // Check if the popup was already dismissed
-  if (localStorage.getItem("popupDismissed") === "true") {
+  if (localStorage.getItem("exitPopupDismissed") === "true") {
     return; // Do not show the popup if it was dismissed before
   }
 
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Existing desktop functionality with mouseleave
   document.addEventListener("mouseleave", function (event) {
-    if (event.clientY <= 0 && localStorage.getItem("popupDismissed") !== "true") {
+    if (event.clientY <= 0 && localStorage.getItem("exitPopupDismissed") !== "true") {
       showPopup();
     }
   });
@@ -59,14 +59,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Detect Scroll Up at the Top of the Page for mobile
   document.addEventListener("touchmove", function (event) {
     var currentScroll = window.scrollY || document.documentElement.scrollTop;
-    if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY) {
+    if (currentScroll <= 0 && event.touches[0].clientY > event.touches[0].screenY && localStorage.getItem("exitPopupDismissed") !== "true") {
       showPopup();
     }
   });
 
   // Use the Visibility Change Event for mobile
   document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden" && localStorage.getItem("popupDismissed") !== "true") {
+    if (document.visibilityState === "hidden" && localStorage.getItem("exitPopupDismissed") !== "true") {
       showPopup();
     }
   });
