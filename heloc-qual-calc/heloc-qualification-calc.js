@@ -97,7 +97,7 @@ function calculateHELOCQualification() {
   const naGraphic = document.getElementById("na-graphic");
 
   // Reset display properties to default each time calculation is performed
-  if (texturedCard) texturedCard.style.display = "block";
+  if (texturedCard) texturedCard.style.display = "flex";
   if (helocNA) helocNA.style.display = "none";
   if (naGraphic) naGraphic.style.display = "none";
 
