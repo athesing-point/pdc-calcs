@@ -152,14 +152,14 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Class 'calc-result' added to the element.");
       }
 
-      // Find the element with ID 'update-color' and change its text color to '#01679A'
-      const colorElement = document.getElementById("update-color");
-      if (colorElement) {
-        colorElement.style.color = "#01679A";
-        console.log("Color set to #01679A for element with ID 'update-color'.");
-      } else {
-        console.log("Element with ID 'update-color' not found.");
-      }
+      // // Find the element with ID 'update-color' and change its text color to '#01679A'
+      // const colorElement = document.getElementById("update-color");
+      // if (colorElement) {
+      //   colorElement.style.color = "#01679A";
+      //   console.log("Color set to #01679A for element with ID 'update-color'.");
+      // } else {
+      //   console.log("Element with ID 'update-color' not found.");
+      // }
     });
   }
 });
