@@ -92,7 +92,7 @@ function calculateHELOCQualification() {
 
   // Determine approval status
   let isApproved = true;
-  const texturedCard = document.querySelector(".textured-card");
+  const texturedCard = document.querySelector("#approved");
   const helocNA = document.querySelector(".calc-card-na");
   const naGraphic = document.getElementById("na-graphic");
 
@@ -108,7 +108,8 @@ function calculateHELOCQualification() {
       if (texturedCard) texturedCard.style.display = "none";
       if (helocNA) {
         helocNA.style.display = "flex";
-        if (naGraphic) naGraphic.style.display = "block";
+        // Temporarily disabled for error prevention
+        // if (naGraphic) naGraphic.style.display = "block";
       }
       isApproved = false;
       break;
@@ -146,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // Find the element with 'calc-card' and 'textured-card' and add the 'calc-result' class
-      const targetElement = document.querySelector(".calc-card.textured-card");
+      const targetElement = document.querySelector("#approved");
       if (targetElement) {
         targetElement.classList.add("calc-result");
         console.log("Class 'calc-result' added to the element.");
