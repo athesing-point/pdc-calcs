@@ -7,19 +7,6 @@ function formatPercentage(value) {
   return `${Math.round(value)}%`;
 }
 
-function mapCreditScore(option) {
-  // Map human-readable credit score options to numerical values
-  const creditScoreMap = {
-    "Poor": 500,
-    "Needs Improvement": 549,
-    "Improving": 599,
-    "Fair": 679,
-    "Good": 739,
-    "Excellent": 800,
-  };
-  return creditScoreMap[option] || 0;
-}
-
 function calculateDTI(income, expenses) {
   if (income === 0) return 0; // Return 0 if income is 0 to avoid division by zero
   let dti = Math.round((expenses / income) * 100);
@@ -29,7 +16,7 @@ function calculateDTI(income, expenses) {
 function calculateLTV(mortgageOwed, homeValue) {
   if (homeValue === 0) return 0; // Return 0 if homeValue is 0 to avoid division by zero
   let ltv = Math.round((mortgageOwed / homeValue) * 100);
-  return isNaN(ltv) || ltv < 0 ? 0 : ltv; // Check for NaN or negative values and default to 0 if true
+  return isNaN(ltv) ? 0 : ltv; // Check for NaN and default to 0 if true
 }
 
 function calculateAvailableEquity(homeValue, mortgageOwed) {
@@ -101,21 +88,29 @@ function calculateHELOCQualification() {
   if (helocNA) helocNA.style.display = "none";
   if (naGraphic) naGraphic.style.display = "none";
 
+  // Add condition for negative available equity
+  if (availableEquity < 0) {
+    if (texturedCard) texturedCard.style.display = "none";
+    if (helocNA) helocNA.style.display = "flex";
+    isApproved = false;
+  }
+
   switch (creditScoreOption.trim().toLowerCase()) {
     case "improving":
     case "needs improvement":
     case "poor":
       if (texturedCard) texturedCard.style.display = "none";
-      if (helocNA) {
-        helocNA.style.display = "flex";
-      }
+      if (helocNA) helocNA.style.display = "flex";
       isApproved = false;
       break;
+    case "excellent":
+    case "good":
+    case "fair":
+      // These are valid options, do nothing special
+      break;
     default:
-      if (mapCreditScore(creditScoreOption) === 0) {
-        console.log("Invalid credit score.");
-        isApproved = false;
-      }
+      console.log("Invalid credit score.");
+      isApproved = false;
   }
 
   // Add condition for DTI greater than 45%
