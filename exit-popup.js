@@ -3,11 +3,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const closeButton = document.querySelector(".close");
   const background = document.querySelector(".modal-bg-layer");
   const section = document.querySelector(".section-exit-popup");
+  const exitHeadline = document.getElementById("exit-headline"); // Get the h2 element
 
-  if (!exitModal || !closeButton || !background || !section) {
+  if (!exitModal || !closeButton || !background || !section || !exitHeadline) {
     console.error("One or more elements are missing!");
     return; // Stop further execution if elements are missing
   }
+
+  // Function to check and fill the headline if empty
+  function checkAndFillHeadline() {
+    if (exitHeadline.textContent.trim() === "") {
+      exitHeadline.textContent = "Check out a HELOC alternative.";
+    }
+  }
+
+  // Call the function to check and fill the headline
+  checkAndFillHeadline();
 
   // Function to close the popup and remember the dismissal
   function closePopup() {
