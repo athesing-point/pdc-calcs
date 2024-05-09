@@ -29,7 +29,7 @@ function calculateDTI(income, expenses) {
 function calculateLTV(mortgageOwed, homeValue) {
   if (homeValue === 0) return 0; // Return 0 if homeValue is 0 to avoid division by zero
   let ltv = Math.round((mortgageOwed / homeValue) * 100);
-  return isNaN(ltv) ? 0 : ltv; // Check for NaN and default to 0 if true
+  return isNaN(ltv) || ltv < 0 ? 0 : ltv; // Check for NaN or negative values and default to 0 if true
 }
 
 function calculateAvailableEquity(homeValue, mortgageOwed) {
