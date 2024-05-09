@@ -56,12 +56,12 @@ function calculateHELOCQualification() {
 
   // Check if required fields are filled
   if (!homeValue || !mortgageOwed || !creditScoreOption) {
-    console.log("Required fields are missing.");
+    // console.log("Required fields are missing.");
     return; // Exit the function if any required field is not filled
   }
 
   // Log initial values for debugging
-  console.log("Initial Values:", { income, creditScoreOption, homeValue, mortgageOwed, expenses });
+  // console.log("Initial Values:", { income, creditScoreOption, homeValue, mortgageOwed, expenses });
 
   // Calculate derived values
   const dti = calculateDTI(income, expenses);
@@ -71,11 +71,11 @@ function calculateHELOCQualification() {
   const borrowAmount = calculateBorrowAmount(creditLine);
 
   // Log calculated values for debugging
-  console.log("Calculated DTI:", dti);
-  console.log("Calculated LTV:", ltv);
-  console.log("Available Equity:", availableEquity);
-  console.log("Credit Line based on Credit Score:", creditLine);
-  console.log("Final Borrow Amount:", borrowAmount);
+  // console.log("Calculated DTI:", dti);
+  // console.log("Calculated LTV:", ltv);
+  // console.log("Available Equity:", availableEquity);
+  // console.log("Credit Line based on Credit Score:", creditLine);
+  // console.log("Final Borrow Amount:", borrowAmount);
 
   // Determine approval status
   let isApproved = true;
@@ -109,7 +109,7 @@ function calculateHELOCQualification() {
       // These are valid options, do nothing special
       break;
     default:
-      console.log("Invalid credit score.");
+      // console.log("Invalid credit score.");
       isApproved = false;
   }
 
@@ -142,23 +142,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if (calcButton) {
     calcButton.addEventListener("click", () => {
       const results = calculateHELOCQualification();
-      console.log(results);
+      // console.log(results);
 
       // Display each result in the corresponding HTML element
       document.querySelectorAll("[calc-result]").forEach((element) => {
         const resultType = element.getAttribute("calc-result");
-        console.log(resultType, results[resultType]);
+        // console.log(resultType, results[resultType]);
         if (results[resultType]) {
           element.innerText = results[resultType];
         }
       });
 
-      // Find the element with 'calc-card' and 'textured-card' and add the 'calc-result' class
-      const targetElement = document.querySelector("#approved");
-      if (targetElement) {
-        targetElement.classList.add("calc-result");
-        console.log("Class 'calc-result' added to the element.");
-      }
+      // // Find the element with 'calc-card' and 'textured-card' and add the 'calc-result' class
+      // const targetElement = document.querySelector("#approved");
+      // if (targetElement) {
+      //   targetElement.classList.add("calc-result");
+      //   // console.log("Class 'calc-result' added to the element.");
+      // }
     });
   }
 });
