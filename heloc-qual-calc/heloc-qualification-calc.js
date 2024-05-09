@@ -108,8 +108,6 @@ function calculateHELOCQualification() {
       if (texturedCard) texturedCard.style.display = "none";
       if (helocNA) {
         helocNA.style.display = "flex";
-        // Temporarily disabled for error prevention
-        // if (naGraphic) naGraphic.style.display = "block";
       }
       isApproved = false;
       break;
@@ -122,6 +120,13 @@ function calculateHELOCQualification() {
 
   // Add condition for DTI greater than 45%
   if (dti > 45) {
+    if (texturedCard) texturedCard.style.display = "none";
+    if (helocNA) helocNA.style.display = "flex";
+    isApproved = false;
+  }
+
+  // Add condition for borrow amount being 0 or negative
+  if (borrowAmount <= 0) {
     if (texturedCard) texturedCard.style.display = "none";
     if (helocNA) helocNA.style.display = "flex";
     isApproved = false;
@@ -159,15 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
         targetElement.classList.add("calc-result");
         console.log("Class 'calc-result' added to the element.");
       }
-
-      // // Find the element with ID 'update-color' and change its text color to '#01679A'
-      // const colorElement = document.getElementById("update-color");
-      // if (colorElement) {
-      //   colorElement.style.color = "#01679A";
-      //   console.log("Color set to #01679A for element with ID 'update-color'.");
-      // } else {
-      //   console.log("Element with ID 'update-color' not found.");
-      // }
     });
   }
 });
