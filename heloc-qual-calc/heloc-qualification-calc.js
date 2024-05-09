@@ -120,6 +120,13 @@ function calculateHELOCQualification() {
       }
   }
 
+  // Add condition for DTI greater than 45%
+  if (dti > 45) {
+    if (texturedCard) texturedCard.style.display = "none";
+    if (helocNA) helocNA.style.display = "flex";
+    isApproved = false;
+  }
+
   // Return the calculated results
   return {
     borrow: formatCurrency(borrowAmount),
