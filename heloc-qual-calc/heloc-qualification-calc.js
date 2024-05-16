@@ -29,9 +29,9 @@ function calculateCreditLine(availableEquity, creditScoreOption) {
   switch (creditScoreOption.trim().toLowerCase()) {
     case "excellent":
       return Math.floor(availableEquity * 0.6);
-    case "good":
+    case "very good":
       return Math.floor(availableEquity * 0.55);
-    case "fair":
+    case "good":
       return Math.floor(availableEquity * 0.5);
     default:
       return 0;
@@ -96,16 +96,16 @@ function calculateHELOCQualification() {
   }
 
   switch (creditScoreOption.trim().toLowerCase()) {
-    case "improving":
-    case "needs improvement":
-    case "poor":
+    case "average":
+    case "low":
+    case "very low":
       if (texturedCard) texturedCard.style.display = "none";
       if (helocNA) helocNA.style.display = "flex";
       isApproved = false;
       break;
     case "excellent":
+    case "very good":
     case "good":
-    case "fair":
       // These are valid options, do nothing special
       break;
     default:
