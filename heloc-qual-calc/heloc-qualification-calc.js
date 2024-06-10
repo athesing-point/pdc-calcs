@@ -16,7 +16,7 @@ function calculateDTI(income, expenses) {
 function calculateLTV(mortgageOwed, homeValue) {
   if (homeValue === 0 || mortgageOwed > homeValue) return 0; // Return 0 if homeValue is 0 or mortgageOwed exceeds homeValue
   let ltv = Math.round((mortgageOwed / homeValue) * 100);
-  return isNaN(ltv) ? 0 : ltv; // Check for NaN and default to 0 if true
+  return isNaN(ltv) ? 0 : Math.min(ltv, 95); // Cap LTV at 95%
 }
 
 function calculateAvailableEquity(homeValue, mortgageOwed) {
@@ -41,8 +41,8 @@ function calculateCreditLine(availableEquity, creditScoreOption) {
 function calculateBorrowAmount(creditLine) {
   // Calculate the final borrow amount, rounding down to the nearest thousand
   let borrowAmount = Math.floor(creditLine / 1000) * 1000;
-  // Cap the borrow amount at $500,000
-  return Math.min(borrowAmount, 500000);
+  // Cap the borrow amount at $500,000 and set a minimum of $10,000
+  return Math.min(Math.max(borrowAmount, 10000), 500000);
 }
 
 // Main function
@@ -113,8 +113,8 @@ function calculateHELOCQualification() {
       isApproved = false;
   }
 
-  // Add condition for DTI greater than 45%
-  if (dti > 45) {
+  // Add condition for DTI greater than 40%
+  if (dti > 40) {
     if (texturedCard) texturedCard.style.display = "none";
     if (helocNA) helocNA.style.display = "flex";
     isApproved = false;
