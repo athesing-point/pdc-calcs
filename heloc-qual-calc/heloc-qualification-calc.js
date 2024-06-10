@@ -16,7 +16,7 @@ function calculateDTI(income, expenses) {
 function calculateLTV(mortgageOwed, homeValue) {
   if (homeValue === 0) return 0; // Return 0 if homeValue is 0 to avoid division by zero
   let ltv = Math.round((mortgageOwed / homeValue) * 100);
-  return isNaN(ltv) ? 0 : Math.min(ltv, 95); // Cap LTV at 95%, ensure it doesn't return NaN
+  return isNaN(ltv) ? 0 : ltv; // Return calculated LTV, ensure it doesn't return NaN
 }
 
 function calculateAvailableEquity(homeValue, mortgageOwed) {
@@ -115,6 +115,13 @@ function calculateHELOCQualification() {
 
   // Add condition for DTI greater than 40%
   if (dti > 40) {
+    if (texturedCard) texturedCard.style.display = "none";
+    if (helocNA) helocNA.style.display = "flex";
+    isApproved = false;
+  }
+
+  // Add condition for LTV greater than 95%
+  if (ltv > 95) {
     if (texturedCard) texturedCard.style.display = "none";
     if (helocNA) helocNA.style.display = "flex";
     isApproved = false;
