@@ -181,3 +181,19 @@ document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
     input.value = formattedValue;
   });
 });
+
+// Add event listener to trigger calculation on Enter key press
+document.querySelectorAll(".calc-input").forEach((input) => {
+  input.addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Prevent the default action to avoid submitting the form
+      const results = calculateHELOCQualification();
+      document.querySelectorAll("[calc-result]").forEach((element) => {
+        const resultType = element.getAttribute("calc-result");
+        if (results[resultType]) {
+          element.innerText = results[resultType];
+        }
+      });
+    }
+  });
+});
