@@ -144,29 +144,27 @@ function calculateHELOCQualification() {
 }
 
 // Set up event listener for the calculate button
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("load", () => {
   const calcButton = document.querySelector('[calc-input="calc_button"]');
   if (calcButton) {
-    calcButton.addEventListener("click", () => {
+    console.log("Calc button found, adding event listener."); // Debugging log
+    calcButton.addEventListener("click", (event) => {
+      event.preventDefault(); // Prevent the default link behavior
+      console.log("Calc button clicked."); // Debugging log
       const results = calculateHELOCQualification();
-      // console.log(results);
+      console.log(results); // Debugging log
 
       // Display each result in the corresponding HTML element
       document.querySelectorAll("[calc-result]").forEach((element) => {
         const resultType = element.getAttribute("calc-result");
-        // console.log(resultType, results[resultType]);
+        console.log(resultType, results[resultType]); // Debugging log
         if (results[resultType]) {
           element.innerText = results[resultType];
         }
       });
-
-      // // Find the element with 'calc-card' and 'textured-card' and add the 'calc-result' class
-      // const targetElement = document.querySelector("#approved");
-      // if (targetElement) {
-      //   targetElement.classList.add("calc-result");
-      //   // console.log("Class 'calc-result' added to the element.");
-      // }
     });
+  } else {
+    console.log("Calc button not found."); // Debugging log
   }
 });
 
