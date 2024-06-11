@@ -120,8 +120,8 @@ function calculateHELOCQualification() {
     isApproved = false;
   }
 
-  // Add condition for LTV greater than 95%
-  if (ltv > 95) {
+  // Add condition for LTV greater than 85%
+  if (ltv > 85) {
     if (texturedCard) texturedCard.style.display = "none";
     if (helocNA) helocNA.style.display = "flex";
     isApproved = false;
