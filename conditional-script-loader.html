@@ -10,10 +10,10 @@
 
   if (isQAReady) {
     scriptUrl = productionScriptUrl;
-  } else if (window.location.hostname === "point.com") {
-    scriptUrl = productionScriptUrl;
-  } else if (window.location.hostname === "www.point.dev" || /\.webflow\.io$/.test(window.location.hostname)) {
+  } else if (/\.webflow\.io$/.test(window.location.hostname)) {
     scriptUrl = devScriptUrl;
+  } else if (window.location.hostname === "point.com" || window.location.hostname === "www.point.dev") {
+    scriptUrl = productionScriptUrl;
   } else {
     // Default to production URL
     scriptUrl = productionScriptUrl;
@@ -21,8 +21,8 @@
 
   // Dynamically create a script element and set its source
   var scriptElement = document.createElement("script");
-  scriptElement.src = scriptUrl;
   scriptElement.defer = true; // Add the defer attribute
+  scriptElement.src = scriptUrl;
 
   // Append the script element to the document's head (recommended for deferred scripts)
   document.head.appendChild(scriptElement);
