@@ -77,8 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (value === "") {
         drawAmountInput.value = "";
       } else {
-        value = Math.max(parseFloat(value), 0); // Allow empty or zero value during input
-        drawAmountInput.value = value.toLocaleString();
+        value = parseFloat(value);
+        drawAmountInput.value = isNaN(value) ? "" : value.toLocaleString();
       }
       calculatePayments();
     }, 500)
