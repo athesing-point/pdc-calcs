@@ -93,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Format draw amount input and set default value
   drawAmountInput.addEventListener("input", () => {
     let value = drawAmountInput.value.replace(/[^0-9]/g, "");
-    value = Math.max(parseFloat(value), 10000); // Enforce minimum draw amount
     drawAmountInput.value = value.toLocaleString();
   });
 
