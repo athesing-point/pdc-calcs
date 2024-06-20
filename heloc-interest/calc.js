@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
   drawAmountInput.value = (50000).toLocaleString();
 
   // Set default interest rate
-  interestRateInput.value = formatPercentage(9.18);
+  interestRateInput.value = formatPercentage(9.0);
 
   // Prevent non-numeric input for draw amount and interest rate
   document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
