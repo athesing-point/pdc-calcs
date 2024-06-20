@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Enforce minimum draw amount of $10,000
     drawAmount = Math.max(drawAmount, 10000);
+    drawAmountInput.value = drawAmount.toLocaleString(); // Update the input field
 
     // Round interest rate to the nearest allowable percentage
     interestRate = Math.min(Math.max(interestRate, 5.5), 14.5);
@@ -70,15 +71,18 @@ document.addEventListener("DOMContentLoaded", () => {
     calculatePayments();
   });
 
-  drawAmountInput.addEventListener("input", () => {
-    let value = drawAmountInput.value.replace(/[^0-9]/g, "");
-    if (value === "") {
-      drawAmountInput.value = "";
-    } else {
-      value = parseFloat(value);
-      drawAmountInput.value = isNaN(value) ? "" : value.toLocaleString();
-    }
-  });
+  drawAmountInput.addEventListener(
+    "input",
+    debounce(() => {
+      let value = drawAmountInput.value.replace(/[^0-9]/g, "");
+      if (value === "") {
+        drawAmountInput.value = "";
+      } else {
+        value = parseFloat(value);
+        drawAmountInput.value = isNaN(value) ? "" : value.toLocaleString();
+      }
+    }, 1000)
+  );
 
   interestRateInput.addEventListener("input", debounce(calculatePayments, 500));
 
