@@ -70,7 +70,20 @@ document.addEventListener("DOMContentLoaded", () => {
     calculatePayments();
   });
 
-  drawAmountInput.addEventListener("input", debounce(calculatePayments, 500));
+  drawAmountInput.addEventListener(
+    "input",
+    debounce(() => {
+      let value = drawAmountInput.value.replace(/[^0-9]/g, "");
+      if (value === "") {
+        drawAmountInput.value = "";
+      } else {
+        value = Math.max(parseFloat(value), 0); // Allow empty or zero value during input
+        drawAmountInput.value = value.toLocaleString();
+      }
+      calculatePayments();
+    }, 500)
+  );
+
   interestRateInput.addEventListener("input", debounce(calculatePayments, 500));
 
   decreaseBtn.addEventListener("click", () => handleInterestRateChange(-0.1));
