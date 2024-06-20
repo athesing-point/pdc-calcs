@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
       calculatePayments();
     }, 500)
   );
-
+  //test
   interestRateInput.addEventListener("input", debounce(calculatePayments, 500));
 
   decreaseBtn.addEventListener("click", () => handleInterestRateChange(-0.1));
