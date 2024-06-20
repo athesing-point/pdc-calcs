@@ -63,6 +63,13 @@ document.addEventListener("DOMContentLoaded", () => {
     debounce(calculatePayments, 500)();
   };
 
+  drawAmountInput.addEventListener("blur", () => {
+    let value = parseFloat(drawAmountInput.value.replace(/[^0-9]/g, ""));
+    value = isNaN(value) ? 10000 : Math.max(value, 10000); // Enforce minimum draw amount on blur
+    drawAmountInput.value = value.toLocaleString();
+    calculatePayments();
+  });
+
   drawAmountInput.addEventListener("input", debounce(calculatePayments, 500));
   interestRateInput.addEventListener("input", debounce(calculatePayments, 500));
 
