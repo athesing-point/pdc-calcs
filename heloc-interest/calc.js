@@ -74,16 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
     "input",
     debounce(() => {
       let value = drawAmountInput.value.replace(/[^0-9]/g, "");
-      if (value === "") {
-        drawAmountInput.value = "";
-      } else {
-        value = parseFloat(value);
-        drawAmountInput.value = isNaN(value) ? "" : value.toLocaleString();
-      }
+      drawAmountInput.value = value; // Allow any value during input
       calculatePayments();
     }, 500)
   );
-  //test
+
   interestRateInput.addEventListener("input", debounce(calculatePayments, 500));
 
   decreaseBtn.addEventListener("click", () => handleInterestRateChange(-0.1));
