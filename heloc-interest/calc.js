@@ -70,14 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
     calculatePayments();
   });
 
-  drawAmountInput.addEventListener(
-    "input",
-    debounce(() => {
-      let value = drawAmountInput.value.replace(/[^0-9]/g, "");
-      drawAmountInput.value = value; // Allow any value during input
-      calculatePayments();
-    }, 500)
-  );
+  drawAmountInput.addEventListener("input", () => {
+    let value = drawAmountInput.value.replace(/[^0-9]/g, "");
+    drawAmountInput.value = value; // Allow any value during input
+  });
 
   interestRateInput.addEventListener("input", debounce(calculatePayments, 500));
 
