@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Input elements
   const homeValueInput = document.querySelector('[calc-input="home-value"]');
-  const currentMortgagePrincipalInput = document.querySelector('[calc-input="current-mortgage-principal"]');
-  const remainingMortgageTermInput = document.querySelector('[calc-input="remaining-mortgage-term"]');
+  const currentMortgagePrincipalInput = document.querySelector('[calc-input="mortgage-principal"]');
+  const remainingMortgageTermInput = document.querySelector('[calc-input="mortgage-term"]');
   const currentMortgageRateInput = document.querySelector('[calc-input="mortgage-rate"]');
-  const creditScoreInput = document.getElementById("creditScore");
+  const creditScoreInput = document.querySelector('[calc-input="credit-score"]');
   const loanAmountInput = document.querySelector('[calc-input="loan-amount"]');
   const cashRefiTermInputs = document.querySelectorAll('[calc-input^="refi-"]');
   const helocTermInputs = document.querySelectorAll('[calc-input^="heloc-"]');
@@ -23,21 +23,40 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentMortgagePrincipal = parseFloat(currentMortgagePrincipalInput.value.replace(/[^0-9.-]+/g, ""));
     let remainingMortgageTerm = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
     let currentMortgageRate = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, "")) / 100;
-    let creditScore = creditScoreInput.value;
+    // let creditScoreText = creditScoreInput.value;
     let loanAmount = parseFloat(loanAmountInput.value.replace(/[^0-9.-]+/g, ""));
-    let cashRefiTerm = document.querySelector('[calc-input^="refi-"]:checked').value;
-    let helocTerm = document.querySelector('[calc-input^="heloc-"]:checked').value;
+    let cashRefiTerm = parseInt(document.querySelector('[calc-input^="refi-"]:checked').value);
+    let helocTerm = parseInt(document.querySelector('[calc-input^="heloc-"]:checked').value);
 
     if (isNaN(homeValue) || isNaN(currentMortgagePrincipal) || isNaN(remainingMortgageTerm) || isNaN(currentMortgageRate) || isNaN(loanAmount)) return;
 
     // Perform calculations
-    const helocAPR = calculateHelocAPR(creditScore);
-    const savings = calculateSavingsAmount(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm, loanAmount, cashRefiTerm, helocTerm, helocAPR);
+    const helocAPR = calculateHelocAPR(creditScoreInput.value); // Ensure this uses the updated credit score value
+    const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
+    const cashRefiPayment = calculateMonthlyPayment(currentMortgagePrincipal + loanAmount, currentMortgageRate, cashRefiTerm);
+    const helocPayment = calculateHelocPayment(loanAmount, helocAPR);
+
+    const totalCurrentMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
+    const totalCashRefiPayments = cashRefiPayment * cashRefiTerm * 12;
+    const totalHelocPayments = helocPayment * helocTerm * 12;
+
+    const savings = totalCurrentMortgagePayments - (totalCashRefiPayments + totalHelocPayments);
 
     // Update UI
     savingsAmountElement.innerText = formatCurrency(savings);
-    savingsPercentElement.innerText = formatPercentage(calculateSavingsPercentage(savings, currentMortgagePrincipal));
-    helocAPRElement.innerText = formatPercentage(helocAPR * 100);
+    savingsPercentElement.innerText = formatPercentage((savings / totalCurrentMortgagePayments) * 100);
+    helocAPRElement.innerText = formatPercentage(helocAPR * 100); // Update the HELOC APR result
+  };
+
+  const calculateMonthlyPayment = (principal, annualRate, termYears) => {
+    const monthlyRate = annualRate / 12;
+    const numberOfPayments = termYears * 12;
+    return (principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+  };
+
+  const calculateHelocPayment = (principal, annualRate) => {
+    const monthlyRate = annualRate / 12;
+    return principal * monthlyRate; // Assuming interest-only payments
   };
 
   const debounce = (func, delay) => {
@@ -48,24 +67,23 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
-  const calculateHelocAPR = (creditScore) => {
-    // Placeholder function to determine HELOC APR based on credit score
-    if (creditScore === "700 - 759") {
-      return 0.0905; // Example APR for this credit score range
+  const calculateHelocAPR = (creditScoreText) => {
+    console.log(`Credit score selected: ${creditScoreText}`);
+    switch (creditScoreText.toLowerCase()) {
+      case "excellent":
+        return 0.055; // 5.50%
+      case "very good":
+        return 0.0734; // 7.34%
+      case "good":
+        return 0.0918; // 9.18% (national average)
+      case "average":
+        return 0.1184; // 11.84%
+      case "low":
+        return 0.145; // 14.50%
+      default:
+        console.log(`Unrecognized credit score: ${creditScoreText}`);
+        return 0.145; // Default to highest rate
     }
-    // Add more conditions for different credit score ranges
-    return 0.1; // Default APR
-  };
-
-  const calculateSavingsAmount = (currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm, loanAmount, cashRefiTerm, helocTerm, helocAPR) => {
-    // Placeholder function to calculate savings
-    // Implement the actual savings calculation logic here
-    return 428000; // Example savings amount in dollars
-  };
-
-  const calculateSavingsPercentage = (savings, currentMortgagePrincipal) => {
-    // Placeholder function to calculate savings percentage
-    return (savings / currentMortgagePrincipal) * 100;
   };
 
   const handleInterestRateChange = (increment) => {
@@ -83,15 +101,17 @@ document.addEventListener("DOMContentLoaded", () => {
     debounce(calculateSavings, 500)();
   };
 
-  // Prevent non-numeric input for dollar and percentage fields
-  document.querySelectorAll('input[input-format="dollar"], input[input-format="percent"]').forEach((input) => {
+  // Prevent non-numeric input for dollar, percentage, and year fields
+  document.querySelectorAll('input[input-format="dollar"], input[input-format="percent"], input[input-format="year"]').forEach((input) => {
     if (input) {
       input.addEventListener("input", () => {
         let numericValue = input.value.replace(/[^0-9.]/g, "");
         if (input.getAttribute("input-format") === "dollar") {
           input.value = numericValue ? `$${parseFloat(numericValue).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : "";
-        } else {
+        } else if (input.getAttribute("input-format") === "percent") {
           input.value = numericValue ? `${parseFloat(numericValue).toFixed(2)}%` : "";
+        } else if (input.getAttribute("input-format") === "year") {
+          input.value = numericValue ? `${parseFloat(numericValue)} yrs` : "";
         }
         calculateSavings(); // Recalculate savings on each input change
       });
@@ -106,32 +126,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Event listeners for input fields
   [homeValueInput, currentMortgagePrincipalInput, loanAmountInput].forEach((input) => {
-    input.addEventListener("input", () => {
-      let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
-      input.value = isNaN(value) ? "" : formatCurrency(value);
+    if (input) {
+      input.addEventListener("input", () => {
+        let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
+        input.value = isNaN(value) ? "" : formatCurrency(value);
+        calculateSavings();
+      });
+    }
+  });
+
+  if (remainingMortgageTermInput) {
+    remainingMortgageTermInput.addEventListener("input", () => {
+      let value = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
+      remainingMortgageTermInput.value = isNaN(value) ? "" : `${value} yrs`;
       calculateSavings();
     });
+  }
+
+  if (currentMortgageRateInput) {
+    currentMortgageRateInput.addEventListener("input", () => {
+      let value = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, ""));
+      currentMortgageRateInput.value = isNaN(value) ? "" : formatPercentage(value);
+      calculateSavings();
+    });
+  }
+
+  if (creditScoreInput) {
+    console.log("Credit score input found:", creditScoreInput); // Log the credit score input element
+
+    const updateHelocAPR = () => {
+      const selectedOption = creditScoreInput.options[creditScoreInput.selectedIndex];
+      const creditScoreText = selectedOption ? selectedOption.value : creditScoreInput.value;
+      console.log(`Selected credit score text: ${creditScoreText}`);
+
+      const helocAPR = calculateHelocAPR(creditScoreText);
+      console.log(`Calculated HELOC APR: ${helocAPR * 100}%`);
+      helocAPRElement.innerText = formatPercentage(helocAPR * 100);
+      calculateSavings();
+    };
+
+    creditScoreInput.addEventListener("change", updateHelocAPR);
+
+    // Set default value and trigger initial calculation
+    creditScoreInput.value = "good";
+    console.log(`Default credit score set to: ${creditScoreInput.value}`);
+    updateHelocAPR();
+  } else {
+    console.log("Credit score input not found"); // Log if the input is not found
+  }
+
+  if (calcButton) {
+    calcButton.addEventListener("click", calculateSavings);
+  }
+
+  cashRefiTermInputs.forEach((input) => {
+    if (input) {
+      input.addEventListener("change", calculateSavings);
+    }
   });
 
-  remainingMortgageTermInput.addEventListener("input", () => {
-    let value = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
-    remainingMortgageTermInput.value = isNaN(value) ? "" : value;
-    calculateSavings();
-  });
-
-  currentMortgageRateInput.addEventListener("input", () => {
-    let value = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, ""));
-    currentMortgageRateInput.value = isNaN(value) ? "" : formatPercentage(value);
-    calculateSavings();
-  });
-
-  [...cashRefiTermInputs, ...helocTermInputs].forEach((input) => {
-    input.addEventListener("change", calculateSavings);
-  });
-
-  calcButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    calculateSavings();
+  helocTermInputs.forEach((input) => {
+    if (input) {
+      input.addEventListener("change", calculateSavings);
+    }
   });
 
   // Add event listener for Enter key to run calculation
@@ -165,10 +222,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Set default values
   homeValueInput.value = formatCurrency(400000);
   currentMortgagePrincipalInput.value = formatCurrency(300000);
-  remainingMortgageTermInput.value = "20";
-  currentMortgageRateInput.value = formatPercentage(4);
-  creditScoreInput.value = "700 - 759";
-  loanAmountInput.value = formatCurrency(50000);
+  remainingMortgageTermInput.value = "20 yrs";
+  currentMortgageRateInput.value = formatPercentage(9.18);
   // document.querySelector('[calc-input="refi-30"]').checked = true;
   // document.querySelector('[calc-input="heloc-30"]').checked = true;
 
