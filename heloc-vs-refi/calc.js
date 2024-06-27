@@ -83,36 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
     debounce(calculateSavings, 500)();
   };
 
-  // Event listeners for input fields
-  [homeValueInput, currentMortgagePrincipalInput, loanAmountInput].forEach((input) => {
-    input.addEventListener("blur", () => {
-      let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
-      input.value = isNaN(value) ? "" : formatCurrency(value);
-      calculateSavings();
-    });
-  });
-
-  remainingMortgageTermInput.addEventListener("blur", () => {
-    let value = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
-    remainingMortgageTermInput.value = isNaN(value) ? "" : value;
-    calculateSavings();
-  });
-
-  currentMortgageRateInput.addEventListener("blur", () => {
-    let value = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, ""));
-    currentMortgageRateInput.value = isNaN(value) ? "" : formatPercentage(value);
-    calculateSavings();
-  });
-
-  [...cashRefiTermInputs, ...helocTermInputs].forEach((input) => {
-    input.addEventListener("change", calculateSavings);
-  });
-
-  calcButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    calculateSavings();
-  });
-
   // Prevent non-numeric input for dollar and percentage fields
   document.querySelectorAll('input[input-format="dollar"], input[input-format="percent"]').forEach((input) => {
     if (input) {
@@ -134,6 +104,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Event listeners for input fields
+  [homeValueInput, currentMortgagePrincipalInput, loanAmountInput].forEach((input) => {
+    input.addEventListener("input", () => {
+      let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
+      input.value = isNaN(value) ? "" : formatCurrency(value);
+      calculateSavings();
+    });
+  });
+
+  remainingMortgageTermInput.addEventListener("input", () => {
+    let value = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
+    remainingMortgageTermInput.value = isNaN(value) ? "" : value;
+    calculateSavings();
+  });
+
+  currentMortgageRateInput.addEventListener("input", () => {
+    let value = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, ""));
+    currentMortgageRateInput.value = isNaN(value) ? "" : formatPercentage(value);
+    calculateSavings();
+  });
+
+  [...cashRefiTermInputs, ...helocTermInputs].forEach((input) => {
+    input.addEventListener("change", calculateSavings);
+  });
+
+  calcButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    calculateSavings();
+  });
+
   // Add event listener for Enter key to run calculation
   document.querySelectorAll(".calc-input").forEach((input) => {
     input.addEventListener("keydown", (event) => {
@@ -151,6 +151,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     });
+
+    // Prevent non-numeric input for dollar fields
+    if (input.getAttribute("input-format") === "dollar") {
+      input.addEventListener("keypress", (event) => {
+        if (!/[0-9.]/.test(event.key)) {
+          event.preventDefault();
+        }
+      });
+    }
   });
 
   // Set default values
