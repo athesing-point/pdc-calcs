@@ -69,20 +69,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const calculateHelocAPR = (creditScoreText) => {
     console.log(`Credit score selected: ${creditScoreText}`);
+    const baseAPR = 0.0917; // 9.17% (national average for "good" credit)
     switch (creditScoreText.toLowerCase()) {
       case "excellent":
-        return 0.055; // 5.50%
+        return baseAPR - 0.0083; // 8.34% (0.83% lower than base)
       case "very good":
-        return 0.0734; // 7.34%
+        return baseAPR - 0.0037; // 8.80% (0.37% lower than base)
       case "good":
-        return 0.0918; // 9.18% (national average)
+        return baseAPR; // 9.17% (base rate)
       case "average":
-        return 0.1184; // 11.84%
+        return baseAPR + 0.0083; // 10.00% (0.83% higher than base)
       case "low":
-        return 0.145; // 14.50%
+        return baseAPR + 0.0164; // 10.81% (1.64% higher than base)
       default:
         console.log(`Unrecognized credit score: ${creditScoreText}`);
-        return 0.145; // Default to highest rate
+        return baseAPR + 0.0164; // Default to highest rate
     }
   };
 
@@ -95,9 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const handleDrawAmountChange = (input, increment) => {
-    let currentAmount = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
-    currentAmount = Math.max(currentAmount + increment, 0); // Adjust the minimum value as needed
-    input.value = formatCurrency(currentAmount);
+    let currentAmount = parseFloat(input.value);
+    currentAmount = Math.max(currentAmount + increment, 0);
+    input.value = input === remainingMortgageTermInput ? `${currentAmount} yrs` : formatCurrency(currentAmount);
     debounce(calculateSavings, 500)();
   };
 
@@ -208,22 +209,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     });
-
-    // Prevent non-numeric input for dollar fields
-    if (input.getAttribute("input-format") === "dollar") {
-      input.addEventListener("keypress", (event) => {
-        if (!/[0-9.]/.test(event.key)) {
-          event.preventDefault();
-        }
-      });
-    }
   });
 
   // Set default values
-  homeValueInput.value = formatCurrency(400000);
-  currentMortgagePrincipalInput.value = formatCurrency(300000);
+  homeValueInput.value = formatCurrency(500000);
+  currentMortgagePrincipalInput.value = formatCurrency(275000);
   remainingMortgageTermInput.value = "20 yrs";
-  currentMortgageRateInput.value = formatPercentage(9.18);
+  currentMortgageRateInput.value = formatPercentage(7.75); // Updated to 7.75%
   // document.querySelector('[calc-input="refi-30"]').checked = true;
   // document.querySelector('[calc-input="heloc-30"]').checked = true;
 
