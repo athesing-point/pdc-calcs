@@ -15,48 +15,77 @@ document.addEventListener("DOMContentLoaded", () => {
   const savingsPercentElement = document.querySelector('[calc-result="savings-percent"]');
   const helocAPRElement = document.querySelector('[calc-result="heloc-apr"]');
 
-  const formatCurrency = (value) => `$${parseFloat(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const formatCurrency = (value) => parseFloat(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const formatPercentage = (value) => `${parseFloat(value).toFixed(2)}%`;
+
+  const calculateMonthlyPayment = (principal, annualRate, termYears) => {
+    const monthlyRate = annualRate / 12;
+    const numberOfPayments = termYears * 12;
+    const payment = (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+    console.log(`Monthly Payment: Principal: ${principal}, Rate: ${annualRate}, Term: ${termYears}, Payment: ${payment}`);
+    return payment;
+  };
+
+  const calculateHelocPayment = (principal, annualRate) => {
+    const monthlyRate = annualRate / 12;
+    const payment = principal * monthlyRate;
+    console.log(`HELOC Payment: Principal: ${principal}, Rate: ${annualRate}, Payment: ${payment}`);
+    return payment;
+  };
 
   const calculateSavings = () => {
     let homeValue = parseFloat(homeValueInput.value.replace(/[^0-9.-]+/g, ""));
     let currentMortgagePrincipal = parseFloat(currentMortgagePrincipalInput.value.replace(/[^0-9.-]+/g, ""));
     let remainingMortgageTerm = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
     let currentMortgageRate = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, "")) / 100;
-    // let creditScoreText = creditScoreInput.value;
     let loanAmount = parseFloat(loanAmountInput.value.replace(/[^0-9.-]+/g, ""));
     let cashRefiTerm = parseInt(document.querySelector('[calc-input^="refi-"]:checked').value);
     let helocTerm = parseInt(document.querySelector('[calc-input^="heloc-"]:checked').value);
 
-    if (isNaN(homeValue) || isNaN(currentMortgagePrincipal) || isNaN(remainingMortgageTerm) || isNaN(currentMortgageRate) || isNaN(loanAmount)) return;
+    console.log(
+      `Inputs: Home Value: ${homeValue}, Current Principal: ${currentMortgagePrincipal}, Remaining Term: ${remainingMortgageTerm}, Current Rate: ${currentMortgageRate}, Loan Amount: ${loanAmount}, Cash-Out Refi Term: ${cashRefiTerm}, HELOC Term: ${helocTerm}`
+    );
 
-    // Perform calculations
-    const helocAPR = calculateHelocAPR(creditScoreInput.value); // Ensure this uses the updated credit score value
+    if (isNaN(homeValue) || isNaN(currentMortgagePrincipal) || isNaN(remainingMortgageTerm) || isNaN(currentMortgageRate) || isNaN(loanAmount)) {
+      console.log("Invalid inputs detected");
+      return;
+    }
+
+    const helocAPR = calculateHelocAPR(creditScoreInput.value);
+    console.log(`HELOC APR: ${helocAPR}`);
+
     const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
     const cashRefiPayment = calculateMonthlyPayment(currentMortgagePrincipal + loanAmount, currentMortgageRate, cashRefiTerm);
     const helocPayment = calculateHelocPayment(loanAmount, helocAPR);
+
+    console.log(`Payments: Current Mortgage: ${currentMortgagePayment}, Cash-Out Refi: ${cashRefiPayment}, HELOC: ${helocPayment}`);
 
     const totalCurrentMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
     const totalCashRefiPayments = cashRefiPayment * cashRefiTerm * 12;
     const totalHelocPayments = helocPayment * helocTerm * 12;
 
-    const savings = totalCurrentMortgagePayments - (totalCashRefiPayments + totalHelocPayments);
+    console.log(`Total Payments: Current Mortgage: ${totalCurrentMortgagePayments}, Cash-Out Refi: ${totalCashRefiPayments}, HELOC: ${totalHelocPayments}`);
 
-    // Update UI
-    savingsAmountElement.innerText = formatCurrency(savings);
-    savingsPercentElement.innerText = formatPercentage((savings / totalCurrentMortgagePayments) * 100);
-    helocAPRElement.innerText = formatPercentage(helocAPR * 100); // Update the HELOC APR result
-  };
+    const remainingBalance = calculateRemainingBalance(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm, helocTerm);
+    console.log(`Remaining Balance after HELOC term: ${remainingBalance}`);
 
-  const calculateMonthlyPayment = (principal, annualRate, termYears) => {
-    const monthlyRate = annualRate / 12;
-    const numberOfPayments = termYears * 12;
-    return (principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-  };
+    const helocOptionCost = totalCurrentMortgagePayments + totalHelocPayments;
+    const cashRefiOptionCost = totalCashRefiPayments;
 
-  const calculateHelocPayment = (principal, annualRate) => {
-    const monthlyRate = annualRate / 12;
-    return principal * monthlyRate; // Assuming interest-only payments
+    console.log(`Total Costs: HELOC Option: ${helocOptionCost}, Cash-Out Refi Option: ${cashRefiOptionCost}`);
+    console.log(`HELOC APR: ${helocAPR}, Current Mortgage Rate: ${currentMortgageRate}`);
+
+    const savings = cashRefiOptionCost - helocOptionCost;
+    console.log(`Savings: ${savings}`);
+
+    savingsAmountElement.innerText = `$${formatCurrency(Math.abs(savings))}`;
+    savingsPercentElement.innerText = formatPercentage((Math.abs(savings) / Math.max(helocOptionCost, cashRefiOptionCost)) * 100);
+    helocAPRElement.innerText = formatPercentage(helocAPR * 100);
+
+    const betterOptionElement = document.querySelector('[calc-result="better-option"]');
+    if (betterOptionElement) {
+      betterOptionElement.innerText = savings > 0 ? "HELOC" : "Cash-Out Refinance";
+    }
   };
 
   const debounce = (func, delay) => {
@@ -68,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const calculateHelocAPR = (creditScoreText) => {
-    console.log(`Credit score selected: ${creditScoreText}`);
     const baseAPR = 0.0917; // 9.17% (national average for "good" credit)
     switch (creditScoreText.toLowerCase()) {
       case "excellent":
@@ -82,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
       case "low":
         return baseAPR + 0.0164; // 10.81% (1.64% higher than base)
       default:
-        console.log(`Unrecognized credit score: ${creditScoreText}`);
         return baseAPR + 0.0164; // Default to highest rate
     }
   };
@@ -95,10 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
     debounce(calculateSavings, 500)();
   };
 
-  const handleDrawAmountChange = (input, increment) => {
-    let currentAmount = parseFloat(input.value);
+  const handleDollarAmountChange = (input, increment) => {
+    let currentAmount = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
     currentAmount = Math.max(currentAmount + increment, 0);
-    input.value = input === remainingMortgageTermInput ? `${currentAmount} yrs` : formatCurrency(currentAmount);
+    input.value = formatCurrency(currentAmount);
     debounce(calculateSavings, 500)();
   };
 
@@ -108,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
       input.addEventListener("input", () => {
         let numericValue = input.value.replace(/[^0-9.]/g, "");
         if (input.getAttribute("input-format") === "dollar") {
-          input.value = numericValue ? `$${parseFloat(numericValue).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : "";
+          input.value = numericValue ? `${parseFloat(numericValue).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : "";
         } else if (input.getAttribute("input-format") === "percent") {
           input.value = numericValue ? `${parseFloat(numericValue).toFixed(2)}%` : "";
         } else if (input.getAttribute("input-format") === "year") {
@@ -125,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Event listeners for input fields
+  // Update the input event listeners for dollar inputs
   [homeValueInput, currentMortgagePrincipalInput, loanAmountInput].forEach((input) => {
     if (input) {
       input.addEventListener("input", () => {
@@ -153,15 +180,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (creditScoreInput) {
-    console.log("Credit score input found:", creditScoreInput); // Log the credit score input element
+    // console.log("Credit score input found:", creditScoreInput);
 
     const updateHelocAPR = () => {
       const selectedOption = creditScoreInput.options[creditScoreInput.selectedIndex];
       const creditScoreText = selectedOption ? selectedOption.value : creditScoreInput.value;
-      console.log(`Selected credit score text: ${creditScoreText}`);
+      // console.log(`Selected credit score text: ${creditScoreText}`);
 
       const helocAPR = calculateHelocAPR(creditScoreText);
-      console.log(`Calculated HELOC APR: ${helocAPR * 100}%`);
+      // console.log(`Calculated HELOC APR: ${helocAPR * 100}%`);
       helocAPRElement.innerText = formatPercentage(helocAPR * 100);
       calculateSavings();
     };
@@ -170,10 +197,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Set default value and trigger initial calculation
     creditScoreInput.value = "good";
-    console.log(`Default credit score set to: ${creditScoreInput.value}`);
+    // console.log(`Default credit score set to: ${creditScoreInput.value}`);
     updateHelocAPR();
   } else {
-    console.log("Credit score input not found"); // Log if the input is not found
+    // console.log("Credit score input not found");
   }
 
   if (calcButton) {
@@ -200,25 +227,52 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateSavings();
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
         event.preventDefault();
+        const isShiftPressed = event.shiftKey;
         if (input === currentMortgageRateInput) {
           handleInterestRateChange(event.key === "ArrowUp" ? 0.1 : -0.1);
         } else if (input.getAttribute("input-format") === "dollar") {
-          handleDrawAmountChange(input, event.key === "ArrowUp" ? 1000 : -1000);
+          const increment = isShiftPressed ? 10000 : 1000;
+          handleDollarAmountChange(input, event.key === "ArrowUp" ? increment : -increment);
         } else if (input === remainingMortgageTermInput) {
-          handleDrawAmountChange(input, event.key === "ArrowUp" ? 1 : -1);
+          // Handle remaining mortgage term separately
+          let currentTerm = parseFloat(input.value);
+          currentTerm = Math.max(currentTerm + (event.key === "ArrowUp" ? 1 : -1), 0);
+          input.value = `${currentTerm} yrs`;
+          debounce(calculateSavings, 500)();
         }
       }
     });
   });
 
-  // Set default values
+  // Update the default value settings
   homeValueInput.value = formatCurrency(500000);
   currentMortgagePrincipalInput.value = formatCurrency(275000);
   remainingMortgageTermInput.value = "20 yrs";
   currentMortgageRateInput.value = formatPercentage(7.75); // Updated to 7.75%
-  // document.querySelector('[calc-input="refi-30"]').checked = true;
-  // document.querySelector('[calc-input="heloc-30"]').checked = true;
-
+  loanAmountInput.value = formatCurrency(100000);
   // Run calculation for default values when the page loads
   calculateSavings();
 });
+
+// Add this new function to calculate the remaining balance
+const calculateRemainingBalance = (principal, annualRate, totalTerm, elapsedTerm) => {
+  console.log(`Calculating remaining balance: Principal: ${principal}, Rate: ${annualRate}, Total Term: ${totalTerm}, Elapsed Term: ${elapsedTerm}`);
+
+  if (typeof calculateMonthlyPayment !== "function") {
+    console.error("calculateMonthlyPayment is not a function");
+    return 0;
+  }
+
+  const monthlyRate = annualRate / 12;
+  const totalPayments = totalTerm * 12;
+  const elapsedPayments = elapsedTerm * 12;
+  const monthlyPayment = calculateMonthlyPayment(principal, annualRate, totalTerm);
+
+  console.log(`Monthly payment calculated: ${monthlyPayment}`);
+
+  const remainingBalance = principal * Math.pow(1 + monthlyRate, elapsedPayments) - (monthlyPayment * (Math.pow(1 + monthlyRate, elapsedPayments) - 1)) / monthlyRate;
+
+  console.log(`Remaining balance calculated: ${remainingBalance}`);
+
+  return remainingBalance;
+};
