@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const savingsPercentElement = document.querySelector('[calc-result="savings-percent"]');
   const helocAPRElement = document.querySelector('[calc-result="heloc-apr"]');
 
-  const formatCurrency = (value) => `$${parseFloat(value).toLocaleString()}`;
+  const formatCurrency = (value) => `$${parseFloat(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   const formatPercentage = (value) => `${parseFloat(value).toFixed(2)}%`;
 
   const calculateSavings = () => {
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Update UI
     savingsAmountElement.innerText = formatCurrency(savings);
-    savingsPercentElement.innerText = `${calculateSavingsPercentage(savings, currentMortgagePrincipal).toFixed(2)}%`;
+    savingsPercentElement.innerText = formatPercentage(calculateSavingsPercentage(savings, currentMortgagePrincipal));
     helocAPRElement.innerText = formatPercentage(helocAPR * 100);
   };
 
@@ -79,21 +79,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const handleDrawAmountChange = (input, increment) => {
     let currentAmount = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
     currentAmount = Math.max(currentAmount + increment, 0); // Adjust the minimum value as needed
-    input.value = currentAmount.toLocaleString();
+    input.value = formatCurrency(currentAmount);
     debounce(calculateSavings, 500)();
   };
 
   // Event listeners for input fields
-  [homeValueInput, currentMortgagePrincipalInput, remainingMortgageTermInput, currentMortgageRateInput, loanAmountInput].forEach((input) => {
+  [homeValueInput, currentMortgagePrincipalInput, loanAmountInput].forEach((input) => {
     input.addEventListener("blur", () => {
       let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
-      if (input === currentMortgageRateInput) {
-        input.value = isNaN(value) ? "" : formatPercentage(value);
-      } else {
-        input.value = isNaN(value) ? "" : input === remainingMortgageTermInput ? value : value.toLocaleString();
-      }
+      input.value = isNaN(value) ? "" : formatCurrency(value);
       calculateSavings();
     });
+  });
+
+  remainingMortgageTermInput.addEventListener("blur", () => {
+    let value = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
+    remainingMortgageTermInput.value = isNaN(value) ? "" : value;
+    calculateSavings();
+  });
+
+  currentMortgageRateInput.addEventListener("blur", () => {
+    let value = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, ""));
+    currentMortgageRateInput.value = isNaN(value) ? "" : formatPercentage(value);
+    calculateSavings();
   });
 
   [...cashRefiTermInputs, ...helocTermInputs].forEach((input) => {
@@ -106,18 +114,24 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Prevent non-numeric input for dollar and percentage fields
-  document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
-    input.addEventListener("input", () => {
-      let numericValue = input.value.replace(/[^0-9.]/g, "");
-      let formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      input.value = formattedValue;
-    });
+  document.querySelectorAll('input[input-format="dollar"], input[input-format="percent"]').forEach((input) => {
+    if (input) {
+      input.addEventListener("input", () => {
+        let numericValue = input.value.replace(/[^0-9.]/g, "");
+        if (input.getAttribute("input-format") === "dollar") {
+          input.value = numericValue ? `$${parseFloat(numericValue).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : "";
+        } else {
+          input.value = numericValue ? `${parseFloat(numericValue).toFixed(2)}%` : "";
+        }
+        calculateSavings(); // Recalculate savings on each input change
+      });
 
-    input.addEventListener("keypress", (event) => {
-      if (!/[0-9.]/.test(event.key)) {
-        event.preventDefault();
-      }
-    });
+      input.addEventListener("keypress", (event) => {
+        if (!/[0-9.]/.test(event.key)) {
+          event.preventDefault();
+        }
+      });
+    }
   });
 
   // Add event listener for Enter key to run calculation
@@ -130,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         if (input === currentMortgageRateInput) {
           handleInterestRateChange(event.key === "ArrowUp" ? 0.1 : -0.1);
-        } else if (input === homeValueInput || input === currentMortgagePrincipalInput || input === loanAmountInput) {
+        } else if (input.getAttribute("input-format") === "dollar") {
           handleDrawAmountChange(input, event.key === "ArrowUp" ? 1000 : -1000);
         } else if (input === remainingMortgageTermInput) {
           handleDrawAmountChange(input, event.key === "ArrowUp" ? 1 : -1);
@@ -146,8 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
   currentMortgageRateInput.value = formatPercentage(4);
   creditScoreInput.value = "700 - 759";
   loanAmountInput.value = formatCurrency(50000);
-  document.querySelector('[calc-input="refi-30"]').checked = true;
-  document.querySelector('[calc-input="heloc-30"]').checked = true;
+  // document.querySelector('[calc-input="refi-30"]').checked = true;
+  // document.querySelector('[calc-input="heloc-30"]').checked = true;
 
   // Run calculation for default values when the page loads
   calculateSavings();
