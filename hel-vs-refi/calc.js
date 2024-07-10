@@ -1,4 +1,36 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Function definitions
+  const formatCurrency = (value) => parseFloat(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const formatPercentage = (value) => `${parseFloat(value).toFixed(2)}%`;
+
+  const calculateMonthlyPayment = (principal, annualRate, termYears) => {
+    const monthlyRate = annualRate / 12;
+    const numberOfPayments = termYears * 12;
+    const payment = (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+    console.log(`Monthly Payment: Principal: ${principal}, Rate: ${annualRate}, Term: ${termYears}, Payment: ${payment}`);
+    return payment;
+  };
+
+  const calculateHomeEquityLoanPayment = (principal, annualRate, termYears) => {
+    return calculateMonthlyPayment(principal, annualRate, termYears);
+  };
+
+  const calculateRemainingBalance = (principal, annualRate, totalTerm, elapsedTerm) => {
+    console.log(`Calculating remaining balance: Principal: ${principal}, Rate: ${annualRate}, Total Term: ${totalTerm}, Elapsed Term: ${elapsedTerm}`);
+
+    const monthlyRate = annualRate / 12;
+    const totalPayments = totalTerm * 12;
+    const elapsedPayments = elapsedTerm * 12;
+    const monthlyPayment = calculateMonthlyPayment(principal, annualRate, totalTerm);
+
+    console.log(`Monthly payment calculated: ${monthlyPayment}`);
+
+    const remainingBalance = principal * Math.pow(1 + monthlyRate, elapsedPayments) - (monthlyPayment * (Math.pow(1 + monthlyRate, elapsedPayments) - 1)) / monthlyRate;
+    console.log(`Remaining balance calculated: ${remainingBalance}`);
+
+    return remainingBalance;
+  };
+
   // Input elements
   const homeValueInput = document.querySelector('[calc-input="home-value"]');
   const currentMortgagePrincipalInput = document.querySelector('[calc-input="mortgage-principal"]');
@@ -14,21 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const savingsAmountElement = document.querySelector('[calc-result="savings-amount"]');
   const savingsPercentElement = document.querySelector('[calc-result="savings-percent"]');
   const homeEquityLoanAPRElement = document.querySelector('[calc-result="heloc-apr"]');
-
-  const formatCurrency = (value) => parseFloat(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  const formatPercentage = (value) => `${parseFloat(value).toFixed(2)}%`;
-
-  const calculateMonthlyPayment = (principal, annualRate, termYears) => {
-    const monthlyRate = annualRate / 12;
-    const numberOfPayments = termYears * 12;
-    const payment = (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-    console.log(`Monthly Payment: Principal: ${principal}, Rate: ${annualRate}, Term: ${termYears}, Payment: ${payment}`);
-    return payment;
-  };
-
-  const calculateHomeEquityLoanPayment = (principal, annualRate, termYears) => {
-    return calculateMonthlyPayment(principal, annualRate, termYears);
-  };
+  const betterOptionElement = document.querySelector('[calc-result="better-option"]');
+  const comparisonTextElement = document.querySelector('[calc-result="comparison-text"]');
 
   const calculateSavings = () => {
     let homeValue = parseFloat(homeValueInput.value.replace(/[^0-9.-]+/g, ""));
@@ -79,9 +98,14 @@ document.addEventListener("DOMContentLoaded", () => {
     savingsPercentElement.innerText = formatPercentage((Math.abs(savings) / Math.max(homeEquityLoanOptionCost, cashRefiOptionCost)) * 100);
     homeEquityLoanAPRElement.innerText = formatPercentage(homeEquityLoanAPR * 100);
 
-    const betterOptionElement = document.querySelector('[calc-result="better-option"]');
-    if (betterOptionElement) {
-      betterOptionElement.innerText = savings > 0 ? "Home Equity Loan" : "Cash-Out Refinance";
+    if (betterOptionElement && comparisonTextElement) {
+      if (savings > 0) {
+        betterOptionElement.innerText = "With a Home Equity Loan you would save";
+        comparisonTextElement.innerText = "Compared to a Cash-out refinance*";
+      } else {
+        betterOptionElement.innerText = "With a Cash-out refi you would save";
+        comparisonTextElement.innerText = "Compared to a Home Equity Loan*";
+      }
     }
   };
 
@@ -250,26 +274,3 @@ document.addEventListener("DOMContentLoaded", () => {
   // Run calculation for default values when the page loads
   calculateSavings();
 });
-
-// Add this new function to calculate the remaining balance
-const calculateRemainingBalance = (principal, annualRate, totalTerm, elapsedTerm) => {
-  console.log(`Calculating remaining balance: Principal: ${principal}, Rate: ${annualRate}, Total Term: ${totalTerm}, Elapsed Term: ${elapsedTerm}`);
-
-  if (typeof calculateMonthlyPayment !== "function") {
-    console.error("calculateMonthlyPayment is not a function");
-    return 0;
-  }
-
-  const monthlyRate = annualRate / 12;
-  const totalPayments = totalTerm * 12;
-  const elapsedPayments = elapsedTerm * 12;
-  const monthlyPayment = calculateMonthlyPayment(principal, annualRate, totalTerm);
-
-  console.log(`Monthly payment calculated: ${monthlyPayment}`);
-
-  const remainingBalance = principal * Math.pow(1 + monthlyRate, elapsedPayments) - (monthlyPayment * (Math.pow(1 + monthlyRate, elapsedPayments) - 1)) / monthlyRate;
-
-  console.log(`Remaining balance calculated: ${remainingBalance}`);
-
-  return remainingBalance;
-};
