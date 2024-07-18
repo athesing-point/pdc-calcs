@@ -1,167 +1,180 @@
-# Home Equity Loan vs. Cash-Out Refinance Calculator Explanation
+# Home Equity Loan vs. Cash-Out Refinance Calculator: Mathematical Formulas and Examples
 
-## Introduction
+## 1. Core Formulas
 
-This document explains the mathematical formulas used in the Home Equity Loan vs. Cash-Out Refinance Calculator and provides example calculations for different scenarios.
+### 1.1 Monthly Payment Calculation
 
-## Mathematical Formulas
-
-### Monthly Payment Calculation
-
-The monthly payment for a loan is calculated using the formula:
+The monthly payment for a loan is calculated using the following formula:
 
 $$
-\text{Payment} = \frac{P \cdot r \cdot (1 + r)^n}{(1 + r)^n - 1}
+\text{Payment} = P \cdot \frac{r(1 + r)^n}{(1 + r)^n - 1}
 $$
 
-where:
+Where:
 
-- \( P \) is the principal loan amount.
-- \( r \) is the monthly interest rate (annual rate divided by 12).
-- \( n \) is the number of monthly payments (loan term in years multiplied by 12).
+- $P$ = Principal loan amount
+- $r$ = Monthly interest rate (annual rate ÷ 12)
+- $n$ = Total number of monthly payments (loan term in years × 12)
 
-### Remaining Balance Calculation
+### 1.2 Remaining Balance Calculation
 
-The remaining balance of a loan after a certain period is calculated using the formula:
+The remaining balance after a certain period is calculated using:
 
 $$
-\text{Remaining Balance} = P \cdot (1 + r)^e - \frac{\text{Payment} \cdot ((1 + r)^e - 1)}{r}
+\text{Remaining Balance} = P(1 + r)^e - \text{Payment} \cdot \frac{(1 + r)^e - 1}{r}
 $$
 
-where:
+Where:
 
-- \( P \) is the principal loan amount.
-- \( r \) is the monthly interest rate.
-- \( e \) is the number of elapsed monthly payments.
-- \(\text{Payment}\) is the monthly payment calculated using the formula above.
+- $P$ = Original principal loan amount
+- $r$ = Monthly interest rate
+- $e$ = Number of payments made
+- $\text{Payment}$ = Monthly payment (from formula 1.1)
 
-### Home Equity Loan APR Calculation
+### 1.3 Home Equity Loan APR Calculation
 
-The APR for a Home Equity Loan is determined based on the credit score:
+The APR for a Home Equity Loan is based on the credit score:
 
-- Excellent: Base APR - 0.83%
-- Very Good: Base APR - 0.37%
-- Good: Base APR
-- Average: Base APR + 0.83%
-- Low: Base APR + 1.64%
+| Credit Score | APR Adjustment   |
+| ------------ | ---------------- |
+| Excellent    | Base APR - 0.83% |
+| Very Good    | Base APR - 0.37% |
+| Good         | Base APR         |
+| Average      | Base APR + 0.83% |
+| Low          | Base APR + 1.64% |
 
-## Example Calculations
+Base APR: 9.17% (national average for "good" credit)
 
-### Scenario 1: Current Mortgage
+## 2. Example Calculations
+
+### 2.1 Current Mortgage
+
+**Inputs:**
 
 - Principal: $275,000
 - Annual Interest Rate: 7.75%
 - Term: 20 years
 
-#### Monthly Payment Calculation
+**Calculation:**
 
 $$
-P = 275,000
+\begin{aligned}
+P &= 275,000 \\
+r &= 0.0775 \div 12 \approx 0.006458 \\
+n &= 20 \times 12 = 240 \\
+\text{Payment} &= 275,000 \cdot \frac{0.006458(1 + 0.006458)^{240}}{(1 + 0.006458)^{240} - 1} \\
+&\approx \$2,276.99
+\end{aligned}
 $$
 
-$$
-r = \frac{7.75}{100 \cdot 12} = 0.006458
-$$
+### 2.2 Cash-Out Refinance
 
-$$
-n = 20 \cdot 12 = 240
-$$
+**Inputs:**
 
-$$
-\text{Payment} = \frac{275,000 \cdot 0.006458 \cdot (1 + 0.006458)^{240}}{(1 + 0.006458)^{240} - 1} \approx 2,276.99
-$$
-
-### Scenario 2: Cash-Out Refinance
-
-- Principal: $375,000 (Current Principal + Loan Amount)
+- Principal: $375,000 (Current Mortgage + $100,000 cash-out)
 - Annual Interest Rate: 7.75%
 - Term: 30 years
 
-#### Monthly Payment Calculation
+**Calculation:**
 
 $$
-P = 375,000
+\begin{aligned}
+P &= 375,000 \\
+r &= 0.0775 \div 12 \approx 0.006458 \\
+n &= 30 \times 12 = 360 \\
+\text{Payment} &= 375,000 \cdot \frac{0.006458(1 + 0.006458)^{360}}{(1 + 0.006458)^{360} - 1} \\
+&\approx \$2,695.12
+\end{aligned}
 $$
 
-$$
-r = \frac{7.75}{100 \cdot 12} = 0.006458
-$$
+### 2.3 Home Equity Loan
 
-$$
-n = 30 \cdot 12 = 360
-$$
-
-$$
-\text{Payment} = \frac{375,000 \cdot 0.006458 \cdot (1 + 0.006458)^{360}}{(1 + 0.006458)^{360} - 1} \approx 2,695.12
-$$
-
-### Scenario 3: Home Equity Loan
+**Inputs:**
 
 - Principal: $100,000
 - Annual Interest Rate: 9.17% (for "Good" credit score)
 - Term: 15 years
 
-#### Monthly Payment Calculation
+**Calculation:**
 
 $$
-P = 100,000
+\begin{aligned}
+P &= 100,000 \\
+r &= 0.0917 \div 12 \approx 0.007642 \\
+n &= 15 \times 12 = 180 \\
+\text{Payment} &= 100,000 \cdot \frac{0.007642(1 + 0.007642)^{180}}{(1 + 0.007642)^{180} - 1} \\
+&\approx \$1,028.61
+\end{aligned}
 $$
 
-$$
-r = \frac{9.17}{100 \cdot 12} = 0.007642
-$$
+### 2.4 Remaining Balance (Current Mortgage after 5 years)
 
-$$
-n = 15 \cdot 12 = 180
-$$
+**Inputs:**
 
-$$
-\text{Payment} = \frac{100,000 \cdot 0.007642 \cdot (1 + 0.007642)^{180}}{(1 + 0.007642)^{180} - 1} \approx 1,028.61
-$$
-
-### Remaining Balance Calculation Example
-
-- Principal: $275,000
+- Original Principal: $275,000
 - Annual Interest Rate: 7.75%
-- Total Term: 20 years
-- Elapsed Term: 5 years
+- Original Term: 20 years
+- Elapsed Time: 5 years
 
-#### Remaining Balance Calculation
-
-$$
-P = 275,000
-$$
+**Calculation:**
 
 $$
-r = \frac{7.75}{100 \cdot 12} = 0.006458
+\begin{aligned}
+P &= 275,000 \\
+r &= 0.0775 \div 12 \approx 0.006458 \\
+e &= 5 \times 12 = 60 \\
+\text{Payment} &\approx 2,276.99 \text{ (from 2.1)} \\
+\text{Remaining Balance} &= 275,000(1 + 0.006458)^{60} - 2,276.99 \cdot \frac{(1 + 0.006458)^{60} - 1}{0.006458} \\
+&\approx \$241,234.56
+\end{aligned}
 $$
 
-$$
-n = 20 \cdot 12 = 240
-$$
+## 3. Comparison of Options
+
+### 3.1 Total Costs
+
+1. **Current Mortgage:**
+
+   - Monthly Payment: $2,276.99
+   - Total Payments: $2,276.99 × 240 = $546,477.60
+   - Total Interest: $546,477.60 - $275,000 = $271,477.60
+
+2. **Cash-Out Refinance:**
+
+   - Monthly Payment: $2,695.12
+   - Total Payments: $2,695.12 × 360 = $970,243.20
+   - Total Interest: $970,243.20 - $375,000 = $595,243.20
+
+3. **Home Equity Loan + Current Mortgage:**
+   - Combined Monthly Payment: $2,276.99 + $1,028.61 = $3,305.60
+   - Total Payments: ($2,276.99 × 240) + ($1,028.61 × 180) = $731,827.60
+   - Total Interest: $731,827.60 - $375,000 = $356,827.60
+
+### 3.2 Savings Comparison
+
+Savings with Home Equity Loan vs. Cash-Out Refinance:
 
 $$
-e = 5 \cdot 12 = 60
+\begin{aligned}
+\text{Savings} &= \text{Total Cost (Cash-Out Refi)} - \text{Total Cost (HEL + Current Mortgage)} \\
+&= \$970,243.20 - \$731,827.60 \\
+&= \$238,415.60
+\end{aligned}
 $$
 
-First, calculate the monthly payment:
+Savings Percentage:
 
 $$
-\text{Payment} = \frac{275,000 \cdot 0.006458 \cdot (1 + 0.006458)^{240}}{(1 + 0.006458)^{240} - 1} \approx 2,276.99
+\text{Savings %} = \frac{\$238,415.60}{\$970,243.20} \times 100\% \approx 24.57\%
 $$
 
-Then, calculate the remaining balance:
+## 4. Conclusion
 
-$$
-\text{Remaining Balance} = 275,000 \cdot (1 + 0.006458)^{60} - \frac{2,276.99 \cdot ((1 + 0.006458)^{60} - 1)}{0.006458} \approx 241,234.56
-$$
+Based on these calculations, the Home Equity Loan option combined with keeping the current mortgage results in significant savings compared to the Cash-Out Refinance option. However, individual circumstances may vary, and other factors such as closing costs, tax implications, and personal financial goals should be considered when making a decision.
 
-## Disclaimers
+## 5. Disclaimers
 
-- The calculations provided are for illustrative purposes only and may not reflect the actual terms of your loan.
-- The APR rates used in the examples are based on average rates and may vary depending on individual circumstances and market conditions.
-- Always consult with a financial advisor or loan officer to get accurate and personalized loan information.
-
-## Conclusion
-
-This document provides the mathematical background and example calculations for the Home Equity Loan vs. Cash-Out Refinance Calculator. By understanding these formulas, you can better comprehend how the calculator determines the monthly payments, remaining balances, and overall costs for different loan scenarios.
+- These calculations are for illustrative purposes only and may not reflect actual loan terms.
+- APR rates used are based on averages and may vary depending on individual circumstances and market conditions.
+- This analysis does not account for potential changes in interest rates, property values, or other economic factors over time.
+- Consult with a qualified financial advisor or loan officer for personalized advice and accurate loan information.

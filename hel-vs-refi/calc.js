@@ -143,16 +143,28 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cashoutElements.length > 0 && helElements.length > 0) {
       if (cashRefiOptionCost < homeEquityLoanOptionCost) {
         // Cash-out refi is the winner
-        cashoutElements.forEach((el) => el.classList.add("text-color-black"));
-        helElements.forEach((el) => el.classList.remove("text-color-black"));
-        if (cashoutTable) cashoutTable.classList.add("text-color-black");
-        if (helTable) helTable.classList.remove("text-color-black");
+        cashoutElements.forEach((el) => {
+          el.classList.add("text-color-black", "text-weight-semibold");
+          el.classList.remove("text-weight-normal");
+        });
+        helElements.forEach((el) => {
+          el.classList.remove("text-color-black", "text-weight-semibold");
+          el.classList.add("text-weight-normal");
+        });
+        if (cashoutTable) cashoutTable.classList.add("text-color-black", "text-weight-semibold");
+        if (helTable) helTable.classList.remove("text-color-black", "text-weight-semibold");
       } else {
         // Home Equity Loan is the winner
-        helElements.forEach((el) => el.classList.add("text-color-black"));
-        cashoutElements.forEach((el) => el.classList.remove("text-color-black"));
-        if (helTable) helTable.classList.add("text-color-black");
-        if (cashoutTable) cashoutTable.classList.remove("text-color-black");
+        helElements.forEach((el) => {
+          el.classList.add("text-color-black", "text-weight-semibold");
+          el.classList.remove("text-weight-normal");
+        });
+        cashoutElements.forEach((el) => {
+          el.classList.remove("text-color-black", "text-weight-semibold");
+          el.classList.add("text-weight-normal");
+        });
+        if (helTable) helTable.classList.add("text-color-black", "text-weight-semibold");
+        if (cashoutTable) cashoutTable.classList.remove("text-color-black", "text-weight-semibold");
       }
     } else {
       console.warn("Cash-out refi or Home Equity Loan elements not found");
