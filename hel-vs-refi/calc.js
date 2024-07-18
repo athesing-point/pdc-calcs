@@ -31,23 +31,49 @@ document.addEventListener("DOMContentLoaded", () => {
     return remainingBalance;
   };
 
-  // Input elements
-  const homeValueInput = document.querySelector('[calc-input="home-value"]');
-  const currentMortgagePrincipalInput = document.querySelector('[calc-input="mortgage-principal"]');
-  const remainingMortgageTermInput = document.querySelector('[calc-input="mortgage-term"]');
-  const currentMortgageRateInput = document.querySelector('[calc-input="mortgage-rate"]');
-  const creditScoreInput = document.querySelector('[calc-input="credit-score"]');
-  const loanAmountInput = document.querySelector('[calc-input="loan-amount"]');
-  const cashRefiTermInputs = document.querySelectorAll('[calc-input^="refi-"]');
-  const homeEquityLoanTermInputs = document.querySelectorAll('[calc-input^="heloc-"]');
-  const calcButton = document.querySelector('[calc-input="calc_button"]');
+  const calculateTableValues = () => {
+    let currentMortgagePrincipal = parseFloat(currentMortgagePrincipalInput.value.replace(/[^0-9.-]+/g, ""));
+    let remainingMortgageTerm = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
+    let currentMortgageRate = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, "")) / 100;
+    let loanAmount = parseFloat(loanAmountInput.value.replace(/[^0-9.-]+/g, ""));
+    let cashRefiTerm = parseInt(document.querySelector('[calc-input^="refi-"]:checked').value);
+    let homeEquityLoanTerm = parseInt(document.querySelector('[calc-input^="heloc-"]:checked').value);
 
-  // Result elements
-  const savingsAmountElement = document.querySelector('[calc-result="savings-amount"]');
-  const savingsPercentElement = document.querySelector('[calc-result="savings-percent"]');
-  const homeEquityLoanAPRElement = document.querySelector('[calc-result="heloc-apr"]');
-  const betterOptionElement = document.querySelector('[calc-result="better-option"]');
-  const comparisonTextElement = document.querySelector('[calc-result="comparison-text"]');
+    const homeEquityLoanAPR = calculateHomeEquityLoanAPR(creditScoreInput.value);
+
+    const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
+    const cashRefiPayment = calculateMonthlyPayment(currentMortgagePrincipal + loanAmount, currentMortgageRate, cashRefiTerm);
+    const homeEquityLoanPayment = calculateHomeEquityLoanPayment(loanAmount, homeEquityLoanAPR, homeEquityLoanTerm);
+
+    const totalCurrentMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
+    const totalCashRefiPayments = cashRefiPayment * cashRefiTerm * 12;
+    const totalHomeEquityLoanPayments = homeEquityLoanPayment * homeEquityLoanTerm * 12;
+
+    const remainingBalance = calculateRemainingBalance(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm, homeEquityLoanTerm);
+
+    const homeEquityLoanOptionCost = totalCurrentMortgagePayments + totalHomeEquityLoanPayments;
+    const cashRefiOptionCost = totalCashRefiPayments;
+
+    const totalPrincipal = currentMortgagePrincipal + loanAmount;
+    const totalInterestCostCashOutRefi = cashRefiOptionCost - totalPrincipal;
+    const totalInterestCostHEL = homeEquityLoanOptionCost - totalPrincipal;
+
+    // Update the table
+    document.querySelector('[calc-result="cash-out-refi-effective-rate"]').innerText = formatPercentage(currentMortgageRate * 100);
+    document.querySelector('[calc-result="hel-effective-rate"]').innerText = formatPercentage(homeEquityLoanAPR * 100);
+
+    document.querySelector('[calc-result="cash-out-refi-monthly-payment"]').innerText = `$${formatCurrency(cashRefiPayment)}`;
+    document.querySelector('[calc-result="hel-monthly-payment"]').innerText = `$${formatCurrency(homeEquityLoanPayment)}`;
+
+    document.querySelector('[calc-result="cash-out-refi-total-principal"]').innerText = `$${formatCurrency(totalPrincipal)}`;
+    document.querySelector('[calc-result="hel-total-principal"]').innerText = `$${formatCurrency(totalPrincipal)}`;
+
+    document.querySelector('[calc-result="cash-out-refi-total-interest-cost"]').innerText = `$${formatCurrency(totalInterestCostCashOutRefi)}`;
+    document.querySelector('[calc-result="hel-total-interest-cost"]').innerText = `$${formatCurrency(totalInterestCostHEL)}`;
+
+    document.querySelector('[calc-result="cash-out-refi-total-cost"]').innerText = `$${formatCurrency(cashRefiOptionCost)}`;
+    document.querySelector('[calc-result="hel-total-cost"]').innerText = `$${formatCurrency(homeEquityLoanOptionCost)}`;
+  };
 
   const calculateSavings = () => {
     let homeValue = parseFloat(homeValueInput.value.replace(/[^0-9.-]+/g, ""));
@@ -107,6 +133,33 @@ document.addEventListener("DOMContentLoaded", () => {
         comparisonTextElement.innerText = "Compared to a Home Equity Loan*";
       }
     }
+
+    // Add class based on the comparison
+    const cashoutTable = document.querySelector("#cashout-table");
+    const helTable = document.querySelector("#hel-table");
+    const cashoutElements = document.querySelectorAll('[calc-result^="cash-out-refi-"]');
+    const helElements = document.querySelectorAll('[calc-result^="hel-"]');
+
+    if (cashoutElements.length > 0 && helElements.length > 0) {
+      if (cashRefiOptionCost < homeEquityLoanOptionCost) {
+        // Cash-out refi is the winner
+        cashoutElements.forEach((el) => el.classList.add("text-color-black"));
+        helElements.forEach((el) => el.classList.remove("text-color-black"));
+        if (cashoutTable) cashoutTable.classList.add("text-color-black");
+        if (helTable) helTable.classList.remove("text-color-black");
+      } else {
+        // Home Equity Loan is the winner
+        helElements.forEach((el) => el.classList.add("text-color-black"));
+        cashoutElements.forEach((el) => el.classList.remove("text-color-black"));
+        if (helTable) helTable.classList.add("text-color-black");
+        if (cashoutTable) cashoutTable.classList.remove("text-color-black");
+      }
+    } else {
+      console.warn("Cash-out refi or Home Equity Loan elements not found");
+    }
+
+    // Update the table values
+    calculateTableValues();
   };
 
   const debounce = (func, delay) => {
@@ -149,6 +202,24 @@ document.addEventListener("DOMContentLoaded", () => {
     input.value = formatCurrency(currentAmount);
     debounce(calculateSavings, 500)();
   };
+
+  // Input elements
+  const homeValueInput = document.querySelector('[calc-input="home-value"]');
+  const currentMortgagePrincipalInput = document.querySelector('[calc-input="mortgage-principal"]');
+  const remainingMortgageTermInput = document.querySelector('[calc-input="mortgage-term"]');
+  const currentMortgageRateInput = document.querySelector('[calc-input="mortgage-rate"]');
+  const creditScoreInput = document.querySelector('[calc-input="credit-score"]');
+  const loanAmountInput = document.querySelector('[calc-input="loan-amount"]');
+  const cashRefiTermInputs = document.querySelectorAll('[calc-input^="refi-"]');
+  const homeEquityLoanTermInputs = document.querySelectorAll('[calc-input^="heloc-"]');
+  const calcButton = document.querySelector('[calc-input="calc_button"]');
+
+  // Result elements
+  const savingsAmountElement = document.querySelector('[calc-result="savings-amount"]');
+  const savingsPercentElement = document.querySelector('[calc-result="savings-percent"]');
+  const homeEquityLoanAPRElement = document.querySelector('[calc-result="heloc-apr"]');
+  const betterOptionElement = document.querySelector('[calc-result="better-option"]');
+  const comparisonTextElement = document.querySelector('[calc-result="comparison-text"]');
 
   // Prevent non-numeric input for dollar, percentage, and year fields
   document.querySelectorAll('input[input-format="dollar"], input[input-format="percent"], input[input-format="year"]').forEach((input) => {
@@ -201,15 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (creditScoreInput) {
-    // console.log("Credit score input found:", creditScoreInput);
-
     const updateHomeEquityLoanAPR = () => {
       const selectedOption = creditScoreInput.options[creditScoreInput.selectedIndex];
       const creditScoreText = selectedOption ? selectedOption.value : creditScoreInput.value;
-      // console.log(`Selected credit score text: ${creditScoreText}`);
 
       const homeEquityLoanAPR = calculateHomeEquityLoanAPR(creditScoreText);
-      // console.log(`Calculated Home Equity Loan APR: ${homeEquityLoanAPR * 100}%`);
       homeEquityLoanAPRElement.innerText = formatPercentage(homeEquityLoanAPR * 100);
       calculateSavings();
     };
@@ -218,14 +285,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Set default value and trigger initial calculation
     creditScoreInput.value = "good";
-    // console.log(`Default credit score set to: ${creditScoreInput.value}`);
     updateHomeEquityLoanAPR();
-  } else {
-    // console.log("Credit score input not found");
   }
 
   if (calcButton) {
-    calcButton.addEventListener("click", calculateSavings);
+    calcButton.addEventListener("click", () => {
+      calculateSavings();
+      calculateTableValues();
+    });
   }
 
   cashRefiTermInputs.forEach((input) => {
@@ -255,7 +322,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const increment = isShiftPressed ? 10000 : 1000;
           handleDollarAmountChange(input, event.key === "ArrowUp" ? increment : -increment);
         } else if (input === remainingMortgageTermInput) {
-          // Handle remaining mortgage term separately
           let currentTerm = parseFloat(input.value);
           currentTerm = Math.max(currentTerm + (event.key === "ArrowUp" ? 1 : -1), 0);
           input.value = `${currentTerm} yrs`;
@@ -271,6 +337,8 @@ document.addEventListener("DOMContentLoaded", () => {
   remainingMortgageTermInput.value = "20 yrs";
   currentMortgageRateInput.value = formatPercentage(7.75); // Updated to 7.75%
   loanAmountInput.value = formatCurrency(100000);
+
   // Run calculation for default values when the page loads
   calculateSavings();
+  calculateTableValues();
 });
