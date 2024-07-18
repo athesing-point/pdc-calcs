@@ -168,10 +168,6 @@ $$
 \text{Savings %} = \frac{\$238,415.60}{\$970,243.20} \times 100\% \approx 24.57\%
 $$
 
-## 4. Conclusion
-
-Based on these calculations, the Home Equity Loan option combined with keeping the current mortgage results in significant savings compared to the Cash-Out Refinance option. However, individual circumstances may vary, and other factors such as closing costs, tax implications, and personal financial goals should be considered when making a decision.
-
 ## 5. Disclaimers
 
 - These calculations are for illustrative purposes only and may not reflect actual loan terms.
