@@ -280,7 +280,7 @@ function calculateSavings() {
   };
 
   const heiRepayment = calculateHEIValues(selectedTerm);
-  const heiOptionCost = totalCurrentMortgagePayments + heiRepayment;
+  const heiOptionCost = heiRepayment;
 
   // Find the lowest cost option
   const lowestCost = Math.min(homeEquityLoanOptionCost, cashRefiOptionCost, heiOptionCost);
@@ -382,21 +382,19 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
     return Math.min(capBasedRepayment, shareBasedRepayment);
   };
 
-  const heiRepayment15 = calculateHEIValues(15);
-  const heiRepayment30 = calculateHEIValues(30);
-
-  const heiTotalCost = selectedTerm === 15 ? heiRepayment15 : heiRepayment30;
-  const heiFinanceCost = heiTotalCost - loanAmount;
+  const heiRepayment = calculateHEIValues(selectedTerm);
+  const heiOptionCost = heiRepayment;
+  const heiFinanceCost = heiOptionCost - loanAmount;
 
   // Update the table with HEI values
   document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
   document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
-  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiTotalCost);
+  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
 
   // Calculate total costs for each option
   const totalCashRefiCost = totalCashRefiPayments;
   const totalHELCost = totalHomeEquityLoanPayments;
-  const totalHEICost = heiTotalCost;
+  const totalHEICost = heiOptionCost;
 
   // Find the lowest cost option
   const lowestCost = Math.min(totalCashRefiCost, totalHELCost, totalHEICost);
