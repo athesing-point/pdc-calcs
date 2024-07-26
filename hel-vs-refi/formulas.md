@@ -41,17 +41,23 @@ APR adjustments based on credit score:
 
 ```
 Cash-Out Refi Rate = (Current Mortgage Principal * Current Mortgage Rate +
-                      New Loan Amount * (Current Mortgage Rate + 0.5%)) /
-                     Total Loan Amount
+                      New Loan Amount * (Current Mortgage Rate + 0.5%))
+                     / Total Loan Amount
 ```
 
 ## Home Equity Investment (HEI) Repayment Calculation
 
 1. Calculate future home value:
-   Future Home Value = Current Home Value \* (1 + Annual Appreciation Rate)^Years
+
+   ```
+   Future Home Value = Current Home Value * (1 + Annual Appreciation Rate)^Years
+   ```
 
 2. Calculate share of appreciation:
-   Share of Appreciation = (Future Home Value - Appreciation Starting Amount) \* Point Percentage
+
+   ```
+   Share of Appreciation = (Future Home Value - Appreciation Starting Amount) * Point Percentage
+   ```
 
    Where:
 
@@ -59,25 +65,41 @@ Cash-Out Refi Rate = (Current Mortgage Principal * Current Mortgage Rate +
    - Point Percentage = 2.2 \* (Loan Amount / Current Home Value)
 
 3. Calculate share-based repayment:
+
+   ```
    Share-Based Repayment = Share of Appreciation + Loan Amount
+   ```
 
 4. Calculate cap-based repayment:
-   Cap-Based Repayment = Loan Amount _ (1 + 0.175 / 12)^(Years _ 12)
+
+   ```
+   Cap-Based Repayment = Loan Amount * (1 + 0.175 / 12)^(Years * 12)
+   ```
 
 5. Final HEI Repayment:
+   ```
    HEI Repayment = Minimum(Share-Based Repayment, Cap-Based Repayment)
+   ```
 
 ## Total Cost Calculations
 
 1. Cash-Out Refinance Total Cost:
-   Total Cost = Monthly Payment \* Term in Months
+
+   ```
+   Total Cost = Monthly Payment * Term in Months
+   ```
 
 2. Home Equity Loan Total Cost:
-   Total Cost = (Current Mortgage Payment _ Remaining Mortgage Term in Months) +
-   (HEL Monthly Payment _ HEL Term in Months)
+
+   ```
+   Total Cost = (Current Mortgage Payment * Remaining Mortgage Term in Months) +
+                (HEL Monthly Payment * HEL Term in Months)
+   ```
 
 3. HEI Total Cost:
+   ```
    Total Cost = HEI Repayment Amount
+   ```
 
 ## Savings Calculation
 
