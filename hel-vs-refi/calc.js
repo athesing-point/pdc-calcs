@@ -24,7 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const calculateHomeEquityLoanPayment = (principal, annualRate, termYears) => {
-    return calculateMonthlyPayment(principal, annualRate, termYears);
+    const monthlyRate = annualRate / 12;
+    const numberOfPayments = termYears * 12;
+    const payment = (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+    console.log(`HELOAN Payment Calculation: Principal: ${principal}, Rate: ${annualRate}, Term: ${termYears}, Payment: ${payment}`);
+    return payment;
   };
 
   const calculateRemainingBalance = (principal, annualRate, totalTerm, elapsedTerm) => {
@@ -131,14 +135,15 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const calculateSavings = () => {
-    let homeValue = Math.max(parseFloat(homeValueInput.value.replace(/[^0-9.-]+/g, "")) || 0, 1);
-    let currentMortgagePrincipal = Math.max(parseFloat(currentMortgagePrincipalInput.value.replace(/[^0-9.-]+/g, "")) || 0, MIN_LOAN_AMOUNT);
-    let remainingMortgageTerm = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
-    let currentMortgageRate = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, "")) / 100;
-    let loanAmount = Math.max(parseFloat(loanAmountInput.value.replace(/[^0-9.-]+/g, "")) || 0, MIN_LOAN_AMOUNT);
+    let homeValue = parseFloat(homeValueInput.value.replace(/[^0-9.-]+/g, "")) || 0;
+    let currentMortgagePrincipal = parseFloat(currentMortgagePrincipalInput.value.replace(/[^0-9.-]+/g, "")) || 0;
+    let remainingMortgageTerm = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, "")) || 0;
+    let currentMortgageRate = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, "")) / 100 || 0;
+    let loanAmount = parseFloat(loanAmountInput.value.replace(/[^0-9.-]+/g, "")) || 0;
     let selectedTerm = parseInt(document.querySelector('[name="term-length"]:checked')?.value || "15");
 
     console.log("Inputs:", {
+      homeValue,
       currentMortgagePrincipal,
       remainingMortgageTerm,
       currentMortgageRate,
@@ -146,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
       selectedTerm,
     });
 
-    if (isNaN(homeValue) || isNaN(currentMortgagePrincipal) || isNaN(remainingMortgageTerm) || isNaN(currentMortgageRate) || isNaN(loanAmount)) {
+    if (isNaN(homeValue) || isNaN(currentMortgagePrincipal) || isNaN(remainingMortgageTerm) || isNaN(currentMortgageRate) || isNaN(loanAmount) || isNaN(selectedTerm)) {
       console.log("Invalid inputs detected");
       return;
     }
@@ -183,31 +188,45 @@ document.addEventListener("DOMContentLoaded", () => {
       homeEquityLoanAPR,
     });
 
+    console.log("Input values:", {
+      currentMortgagePrincipal,
+      remainingMortgageTerm,
+      currentMortgageRate,
+      loanAmount,
+      selectedTerm,
+      homeEquityLoanAPR,
+    });
+
     const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
-    const cashRefiPayment = calculateMonthlyPayment(totalLoanAmount, cashOutRefiRate, selectedTerm);
     const homeEquityLoanPayment = calculateHomeEquityLoanPayment(loanAmount, homeEquityLoanAPR, selectedTerm);
 
     console.log("Calculated payments:", {
       currentMortgagePayment,
-      cashRefiPayment,
       homeEquityLoanPayment,
     });
 
     const totalCurrentMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
-    const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
     const totalHomeEquityLoanPayments = homeEquityLoanPayment * selectedTerm * 12;
 
-    console.log(`Total Payments: Current Mortgage: ${totalCurrentMortgagePayments}, Cash-Out Refi: ${totalCashRefiPayments}, Home Equity Loan: ${totalHomeEquityLoanPayments}`);
-
-    const remainingBalance = calculateRemainingBalance(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm, selectedTerm);
-    console.log(`Remaining Balance after Home Equity Loan term: ${remainingBalance}`);
+    console.log("Total payments:", {
+      totalCurrentMortgagePayments,
+      totalHomeEquityLoanPayments,
+    });
 
     const homeEquityLoanOptionCost = totalCurrentMortgagePayments + totalHomeEquityLoanPayments;
-    const cashRefiOptionCost = totalCashRefiPayments;
+    const totalInterestCostHEL = totalHomeEquityLoanPayments - loanAmount;
 
-    console.log(`Total Costs: Home Equity Loan Option: ${homeEquityLoanOptionCost}, Cash-Out Refi Option: ${cashRefiOptionCost}`);
-    console.log(`Home Equity Loan APR: ${homeEquityLoanAPR}, Current Mortgage Rate: ${currentMortgageRate}`);
+    console.log("HELOAN results:", {
+      homeEquityLoanAPR,
+      homeEquityLoanPayment,
+      totalHomeEquityLoanPayments,
+      homeEquityLoanOptionCost,
+      totalInterestCostHEL,
+    });
 
+    const cashRefiPayment = calculateMonthlyPayment(totalLoanAmount, cashOutRefiRate, selectedTerm);
+    const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
+    const cashRefiOptionCost = totalCashRefiPayments; // Define cashRefiOptionCost here
     const savings = cashRefiOptionCost - homeEquityLoanOptionCost;
     console.log(`Savings: ${savings}`);
 
