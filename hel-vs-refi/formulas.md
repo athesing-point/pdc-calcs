@@ -1,8 +1,12 @@
-# Home Equity Loan vs. Cash-Out Refinance Calculator: Mathematical Formulas and Examples
+# Home Equity Loan vs. Cash-Out Refinance Calculator: Mathematical Formulas
 
 ## 1. Core Formulas
 
-### 1.1 Monthly Payment Calculation
+### 1.1 Loan-to-Value (LTV) Ratio
+
+LTV = (Current Mortgage Principal + Loan Amount) / Home Value
+
+### 1.2 Monthly Payment Calculation
 
 The monthly payment for a loan is calculated using the following formula:
 
@@ -16,7 +20,7 @@ Where:
 - $r$ = Monthly interest rate (annual rate ÷ 12)
 - $n$ = Total number of monthly payments (loan term in years × 12)
 
-### 1.2 Remaining Balance Calculation
+### 1.3 Remaining Balance Calculation
 
 The remaining balance after a certain period is calculated using:
 
@@ -29,9 +33,9 @@ Where:
 - $P$ = Original principal loan amount
 - $r$ = Monthly interest rate
 - $e$ = Number of payments made
-- $\text{Payment}$ = Monthly payment (from formula 1.1)
+- $\text{Payment}$ = Monthly payment (from formula 1.2)
 
-### 1.3 Home Equity Loan APR Calculation
+### 1.4 Home Equity Loan APR Calculation
 
 The APR for a Home Equity Loan is based on the credit score:
 
@@ -43,134 +47,61 @@ The APR for a Home Equity Loan is based on the credit score:
 | Average      | Base APR + 0.83% |
 | Low          | Base APR + 1.64% |
 
-Base APR: 9.17% (national average for "good" credit)
+Base APR: 9.17%
 
-## 2. Example Calculations
-
-### 2.1 Current Mortgage
-
-**Inputs:**
-
-- Principal: $275,000
-- Annual Interest Rate: 7.75%
-- Term: 20 years
-
-**Calculation:**
+### 1.5 Cash-Out Refinance Effective Rate
 
 $$
-\begin{aligned}
-P &= 275,000 \\
-r &= 0.0775 \div 12 \approx 0.006458 \\
-n &= 20 \times 12 = 240 \\
-\text{Payment} &= 275,000 \cdot \frac{0.006458(1 + 0.006458)^{240}}{(1 + 0.006458)^{240} - 1} \\
-&\approx \$2,276.99
-\end{aligned}
+\text{Effective Rate} = \frac{(P_c \cdot r_c) + (L \cdot (r_c + 0.005))}{P_c + L}
 $$
 
-### 2.2 Cash-Out Refinance
+Where:
 
-**Inputs:**
+- $P_c$ = Current mortgage principal
+- $r_c$ = Current mortgage rate
+- $L$ = Loan amount (cash-out amount)
 
-- Principal: $375,000 (Current Mortgage + $100,000 cash-out)
-- Annual Interest Rate: 7.75%
-- Term: 30 years
-
-**Calculation:**
+### 1.6 Home Equity Investment (HEI) Repayment
 
 $$
-\begin{aligned}
-P &= 375,000 \\
-r &= 0.0775 \div 12 \approx 0.006458 \\
-n &= 30 \times 12 = 360 \\
-\text{Payment} &= 375,000 \cdot \frac{0.006458(1 + 0.006458)^{360}}{(1 + 0.006458)^{360} - 1} \\
-&\approx \$2,695.12
-\end{aligned}
+\text{HEI Repayment} = \min(\text{Cap-based Repayment}, \text{Share-based Repayment})
 $$
 
-### 2.3 Home Equity Loan
+Where:
 
-**Inputs:**
+- Cap-based Repayment = $L \cdot (1 + 0.175 / 12)^{(y \cdot 12)}$
+- Share-based Repayment = $L + \text{Share of Appreciation}$
+- Share of Appreciation = $(H_f - A_s) \cdot P_p$
+- $H_f$ = Future Home Value = $H_c \cdot (1 + 0.035)^y$
+- $A_s$ = Appreciation Starting Amount = $\text{round}((H_c \cdot 0.73) / 1000) \cdot 1000$
+- $P_p$ = Point Percentage = $2.2 \cdot (L / H_c)$
 
-- Principal: $100,000
-- Annual Interest Rate: 9.17% (for "Good" credit score)
-- Term: 15 years
+Where:
 
-**Calculation:**
+- $L$ = Loan amount
+- $y$ = Number of years
+- $H_c$ = Current home value
+- $H_f$ = Future home value
 
-$$
-\begin{aligned}
-P &= 100,000 \\
-r &= 0.0917 \div 12 \approx 0.007642 \\
-n &= 15 \times 12 = 180 \\
-\text{Payment} &= 100,000 \cdot \frac{0.007642(1 + 0.007642)^{180}}{(1 + 0.007642)^{180} - 1} \\
-&\approx \$1,028.61
-\end{aligned}
-$$
+## 2. Calculation Steps
 
-### 2.4 Remaining Balance (Current Mortgage after 5 years)
+1. Calculate LTV and check if it's within approved range (5% - 85%).
+2. Calculate current mortgage payment.
+3. Calculate cash-out refinance effective rate.
+4. Calculate home equity loan APR based on credit score.
+5. Calculate monthly payments for cash-out refinance and home equity loan.
+6. Calculate total costs for each option:
+   - Cash-Out Refinance: Monthly payment × Term × 12
+   - Home Equity Loan: (Current mortgage payment × Remaining term × 12) + (HEL monthly payment × HEL term × 12)
+   - HEI: (Current mortgage payment × Remaining term × 12) + HEI Repayment
+7. Calculate total interest costs for each option.
+8. Compare total costs to determine the lowest cost option.
 
-**Inputs:**
+## 3. Constraints and Assumptions
 
-- Original Principal: $275,000
-- Annual Interest Rate: 7.75%
-- Original Term: 20 years
-- Elapsed Time: 5 years
-
-**Calculation:**
-
-$$
-\begin{aligned}
-P &= 275,000 \\
-r &= 0.0775 \div 12 \approx 0.006458 \\
-e &= 5 \times 12 = 60 \\
-\text{Payment} &\approx 2,276.99 \text{ (from 2.1)} \\
-\text{Remaining Balance} &= 275,000(1 + 0.006458)^{60} - 2,276.99 \cdot \frac{(1 + 0.006458)^{60} - 1}{0.006458} \\
-&\approx \$241,234.56
-\end{aligned}
-$$
-
-## 3. Comparison of Options
-
-### 3.1 Total Costs
-
-1. **Current Mortgage:**
-
-   - Monthly Payment: $2,276.99
-   - Total Payments: $2,276.99 × 240 = $546,477.60
-   - Total Interest: $546,477.60 - $275,000 = $271,477.60
-
-2. **Cash-Out Refinance:**
-
-   - Monthly Payment: $2,695.12
-   - Total Payments: $2,695.12 × 360 = $970,243.20
-   - Total Interest: $970,243.20 - $375,000 = $595,243.20
-
-3. **Home Equity Loan + Current Mortgage:**
-   - Combined Monthly Payment: $2,276.99 + $1,028.61 = $3,305.60
-   - Total Payments: ($2,276.99 × 240) + ($1,028.61 × 180) = $731,827.60
-   - Total Interest: $731,827.60 - $375,000 = $356,827.60
-
-### 3.2 Savings Comparison
-
-Savings with Home Equity Loan vs. Cash-Out Refinance:
-
-$$
-\begin{aligned}
-\text{Savings} &= \text{Total Cost (Cash-Out Refi)} - \text{Total Cost (HEL + Current Mortgage)} \\
-&= \$970,243.20 - \$731,827.60 \\
-&= \$238,415.60
-\end{aligned}
-$$
-
-Savings Percentage:
-
-$$
-\text{Savings %} = \frac{\$238,415.60}{\$970,243.20} \times 100\% \approx 24.57\%
-$$
-
-## 5. Disclaimers
-
-- These calculations are for illustrative purposes only and may not reflect actual loan terms.
-- APR rates used are based on averages and may vary depending on individual circumstances and market conditions.
-- This analysis does not account for potential changes in interest rates, property values, or other economic factors over time.
-- Consult with a qualified financial advisor or loan officer for personalized advice and accurate loan information.
+- Maximum LTV: 85%
+- Minimum LTV: 5%
+- Minimum loan amount: $1
+- Home appreciation rate for HEI calculations: 3.5% per year
+- HEI cap rate: 17.5% per year
+- HEI simple appreciation multiple: 2.2
