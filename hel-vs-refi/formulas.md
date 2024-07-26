@@ -2,28 +2,28 @@
 
 ## Loan-to-Value (LTV) Calculation
 
-LTV = Loan Amount / Home Value
+$LTV = \frac{\text{Loan Amount}}{\text{Home Value}}$
 
 ## Monthly Payment Calculation
 
-Monthly Payment = P _ r _ (1 + r)^n / ((1 + r)^n - 1)
+$\text{Monthly Payment} = P \times \frac{r(1 + r)^n}{(1 + r)^n - 1}$
 
 Where:
 
-- P = Principal loan amount
-- r = Monthly interest rate (Annual rate / 12)
-- n = Total number of months (Term in years \* 12)
+- $P$ = Principal loan amount
+- $r$ = Monthly interest rate (Annual rate / 12)
+- $n$ = Total number of months (Term in years × 12)
 
 ## Remaining Balance Calculation
 
-Remaining Balance = P _ (1 + r)^t - (M _ ((1 + r)^t - 1) / r)
+$\text{Remaining Balance} = P(1 + r)^t - \left(M \times \frac{(1 + r)^t - 1}{r}\right)$
 
 Where:
 
-- P = Original principal loan amount
-- r = Monthly interest rate (Annual rate / 12)
-- t = Number of months elapsed
-- M = Monthly payment
+- $P$ = Original principal loan amount
+- $r$ = Monthly interest rate (Annual rate / 12)
+- $t$ = Number of months elapsed
+- $M$ = Monthly payment
 
 ## Home Equity Loan APR Calculation
 
@@ -39,68 +39,67 @@ APR adjustments based on credit score:
 
 ## Cash-Out Refinance Rate Calculation
 
-```
-Cash-Out Refi Rate = (Current Mortgage Principal * Current Mortgage Rate +
-                      New Loan Amount * (Current Mortgage Rate + 0.5%))
-                     / Total Loan Amount
-```
+$$
+\text{Cash-Out Refi Rate} = \frac{\text{Current Mortgage Principal} \times \text{Current Mortgage Rate} + \text{New Loan Amount} \times (\text{Current Mortgage Rate} + 0.5\%)}{\text{Total Loan Amount}}
+$$
 
 ## Home Equity Investment (HEI) Repayment Calculation
 
 1. Calculate future home value:
 
-   ```
-   Future Home Value = Current Home Value * (1 + Annual Appreciation Rate)^Years
-   ```
+   $$
+   \text{Future Home Value} = \text{Current Home Value} \times (1 + \text{Annual Appreciation Rate})^{\text{Years}}
+   $$
 
 2. Calculate share of appreciation:
 
-   ```
-   Share of Appreciation = (Future Home Value - Appreciation Starting Amount) * Point Percentage
-   ```
+   $$
+   \text{Share of Appreciation} = (\text{Future Home Value} - \text{Appreciation Starting Amount}) \times \text{Point Percentage}
+   $$
 
    Where:
 
-   - Appreciation Starting Amount = Round down(Current Home Value \* 0.73) to nearest $1000
-   - Point Percentage = 2.2 \* (Loan Amount / Current Home Value)
+   - Appreciation Starting Amount = Round down(Current Home Value × 0.73) to nearest $1000
+   - Point Percentage = 2.2 × (Loan Amount / Current Home Value)
 
 3. Calculate share-based repayment:
 
-   ```
-   Share-Based Repayment = Share of Appreciation + Loan Amount
-   ```
+   $$
+   \text{Share-Based Repayment} = \text{Share of Appreciation} + \text{Loan Amount}
+   $$
 
 4. Calculate cap-based repayment:
 
-   ```
-   Cap-Based Repayment = Loan Amount * (1 + 0.175 / 12)^(Years * 12)
-   ```
+   $$
+   \text{Cap-Based Repayment} = \text{Loan Amount} \times (1 + 0.175 / 12)^{(\text{Years} \times 12)}
+   $$
 
 5. Final HEI Repayment:
-   ```
-   HEI Repayment = Minimum(Share-Based Repayment, Cap-Based Repayment)
-   ```
+   $$
+   \text{HEI Repayment} = \min(\text{Share-Based Repayment}, \text{Cap-Based Repayment})
+   $$
 
 ## Total Cost Calculations
 
 1. Cash-Out Refinance Total Cost:
 
-   ```
-   Total Cost = Monthly Payment * Term in Months
-   ```
+   $$
+   \text{Total Cost} = \text{Monthly Payment} \times \text{Term in Months}
+   $$
 
 2. Home Equity Loan Total Cost:
 
-   ```
-   Total Cost = (Current Mortgage Payment * Remaining Mortgage Term in Months) +
-                (HEL Monthly Payment * HEL Term in Months)
-   ```
+   $$
+   \text{Total Cost} = (\text{Current Mortgage Payment} \times \text{Remaining Mortgage Term in Months}) + (\text{HEL Monthly Payment} \times \text{HEL Term in Months})
+   $$
 
 3. HEI Total Cost:
-   ```
-   Total Cost = HEI Repayment Amount
-   ```
+   $$
+   \text{Total Cost} = \text{HEI Repayment Amount}
+   $$
 
 ## Savings Calculation
 
-Savings = Higher Cost Option - Lower Cost Option
+$$
+\text{Savings} = \text{Higher Cost Option} - \text{Lower Cost Option}
+$$
