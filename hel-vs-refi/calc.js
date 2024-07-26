@@ -289,7 +289,7 @@ function calculateSavings() {
   // Compare only HELoan and Cash-out refi for the better option text
   if (homeEquityLoanOptionCost <= cashRefiOptionCost) {
     savings = cashRefiOptionCost - homeEquityLoanOptionCost;
-    betterOptionText = "With a HELoan you would save";
+    betterOptionText = "With a HE loan you would save";
   } else {
     savings = homeEquityLoanOptionCost - cashRefiOptionCost;
     betterOptionText = "With a Cash-out refi you would save";
