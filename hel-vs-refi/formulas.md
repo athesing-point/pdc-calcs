@@ -1,176 +1,86 @@
-# Home Equity Loan vs. Cash-Out Refinance Calculator: Mathematical Formulas and Examples
+# Mathematical Formulas Used in HEL vs Refi Calculator
 
-## 1. Core Formulas
+## Loan-to-Value (LTV) Calculation
 
-### 1.1 Monthly Payment Calculation
+LTV = Loan Amount / Home Value
 
-The monthly payment for a loan is calculated using the following formula:
+## Monthly Payment Calculation
 
-$$
-\text{Payment} = P \cdot \frac{r(1 + r)^n}{(1 + r)^n - 1}
-$$
+Monthly Payment = P * r * (1 + r)^n / ((1 + r)^n - 1)
 
 Where:
 
-- $P$ = Principal loan amount
-- $r$ = Monthly interest rate (annual rate ÷ 12)
-- $n$ = Total number of monthly payments (loan term in years × 12)
+- P = Principal loan amount
+- r = Monthly interest rate (Annual rate / 12)
+- n = Total number of months (Term in years × 12)
 
-### 1.2 Remaining Balance Calculation
+## Remaining Balance Calculation
 
-The remaining balance after a certain period is calculated using:
-
-$$
-\text{Remaining Balance} = P(1 + r)^e - \text{Payment} \cdot \frac{(1 + r)^e - 1}{r}
-$$
+Remaining Balance = P * (1 + r)^t - M * ((1 + r)^t - 1) / r
 
 Where:
 
-- $P$ = Original principal loan amount
-- $r$ = Monthly interest rate
-- $e$ = Number of payments made
-- $\text{Payment}$ = Monthly payment (from formula 1.1)
+- P = Original principal loan amount
+- r = Monthly interest rate (Annual rate / 12)
+- t = Number of months elapsed
+- M = Monthly payment
 
-### 1.3 Home Equity Loan APR Calculation
+## Home Equity Loan APR Calculation
 
-The APR for a Home Equity Loan is based on the credit score:
+Base APR = 9.17%
 
-| Credit Score | APR Adjustment   |
-| ------------ | ---------------- |
-| Excellent    | Base APR - 0.83% |
-| Very Good    | Base APR - 0.37% |
-| Good         | Base APR         |
-| Average      | Base APR + 0.83% |
-| Low          | Base APR + 1.64% |
+APR adjustments based on credit score:
 
-Base APR: 9.17% (national average for "good" credit)
+- Excellent: Base APR - 0.83%
+- Very Good: Base APR - 0.37%
+- Good: Base APR (no adjustment)
+- Average: Base APR + 0.83%
+- Low: Base APR + 1.64%
 
-## 2. Example Calculations
+## Cash-Out Refinance Rate Calculation
 
-### 2.1 Current Mortgage
+Cash-Out Refi Rate = (Current Mortgage Principal * Current Mortgage Rate + New Loan Amount * (Current Mortgage Rate + 0.5%)) / Total Loan Amount
 
-**Inputs:**
+## Home Equity Investment (HEI) Repayment Calculation
 
-- Principal: $275,000
-- Annual Interest Rate: 7.75%
-- Term: 20 years
+1. Calculate future home value:
 
-**Calculation:**
+   Future Home Value = Current Home Value * (1 + Annual Appreciation Rate)^Years
 
-$$
-\begin{aligned}
-P &= 275,000 \\
-r &= 0.0775 \div 12 \approx 0.006458 \\
-n &= 20 \times 12 = 240 \\
-\text{Payment} &= 275,000 \cdot \frac{0.006458(1 + 0.006458)^{240}}{(1 + 0.006458)^{240} - 1} \\
-&\approx \$2,276.99
-\end{aligned}
-$$
+2. Calculate share of appreciation:
 
-### 2.2 Cash-Out Refinance
+   Share of Appreciation = (Future Home Value - Appreciation Starting Amount) * Point Percentage
 
-**Inputs:**
+   Where:
+   - Appreciation Starting Amount = Round down(Current Home Value * 0.73) to nearest $1000
+   - Point Percentage = 2.2 * (Loan Amount / Current Home Value)
 
-- Principal: $375,000 (Current Mortgage + $100,000 cash-out)
-- Annual Interest Rate: 7.75%
-- Term: 30 years
+3. Calculate share-based repayment:
 
-**Calculation:**
+   Share-Based Repayment = Share of Appreciation + Loan Amount
 
-$$
-\begin{aligned}
-P &= 375,000 \\
-r &= 0.0775 \div 12 \approx 0.006458 \\
-n &= 30 \times 12 = 360 \\
-\text{Payment} &= 375,000 \cdot \frac{0.006458(1 + 0.006458)^{360}}{(1 + 0.006458)^{360} - 1} \\
-&\approx \$2,695.12
-\end{aligned}
-$$
+4. Calculate cap-based repayment:
 
-### 2.3 Home Equity Loan
+   Cap-Based Repayment = Loan Amount * (1 + 0.175 / 12)^(Years * 12)
 
-**Inputs:**
+5. Final HEI Repayment:
 
-- Principal: $100,000
-- Annual Interest Rate: 9.17% (for "Good" credit score)
-- Term: 15 years
+   HEI Repayment = min(Share-Based Repayment, Cap-Based Repayment)
 
-**Calculation:**
+## Total Cost Calculations
 
-$$
-\begin{aligned}
-P &= 100,000 \\
-r &= 0.0917 \div 12 \approx 0.007642 \\
-n &= 15 \times 12 = 180 \\
-\text{Payment} &= 100,000 \cdot \frac{0.007642(1 + 0.007642)^{180}}{(1 + 0.007642)^{180} - 1} \\
-&\approx \$1,028.61
-\end{aligned}
-$$
+1. Cash-Out Refinance Total Cost:
 
-### 2.4 Remaining Balance (Current Mortgage after 5 years)
+   Total Cost = Monthly Payment * Term in Months
 
-**Inputs:**
+2. Home Equity Loan Total Cost:
 
-- Original Principal: $275,000
-- Annual Interest Rate: 7.75%
-- Original Term: 20 years
-- Elapsed Time: 5 years
+   Total Cost = (Current Mortgage Payment * Remaining Mortgage Term in Months) + (HEL Monthly Payment * HEL Term in Months)
 
-**Calculation:**
+3. HEI Total Cost:
 
-$$
-\begin{aligned}
-P &= 275,000 \\
-r &= 0.0775 \div 12 \approx 0.006458 \\
-e &= 5 \times 12 = 60 \\
-\text{Payment} &\approx 2,276.99 \text{ (from 2.1)} \\
-\text{Remaining Balance} &= 275,000(1 + 0.006458)^{60} - 2,276.99 \cdot \frac{(1 + 0.006458)^{60} - 1}{0.006458} \\
-&\approx \$241,234.56
-\end{aligned}
-$$
+   Total Cost = HEI Repayment Amount
 
-## 3. Comparison of Options
+## Savings Calculation
 
-### 3.1 Total Costs
-
-1. **Current Mortgage:**
-
-   - Monthly Payment: $2,276.99
-   - Total Payments: $2,276.99 × 240 = $546,477.60
-   - Total Interest: $546,477.60 - $275,000 = $271,477.60
-
-2. **Cash-Out Refinance:**
-
-   - Monthly Payment: $2,695.12
-   - Total Payments: $2,695.12 × 360 = $970,243.20
-   - Total Interest: $970,243.20 - $375,000 = $595,243.20
-
-3. **Home Equity Loan + Current Mortgage:**
-   - Combined Monthly Payment: $2,276.99 + $1,028.61 = $3,305.60
-   - Total Payments: ($2,276.99 × 240) + ($1,028.61 × 180) = $731,827.60
-   - Total Interest: $731,827.60 - $375,000 = $356,827.60
-
-### 3.2 Savings Comparison
-
-Savings with Home Equity Loan vs. Cash-Out Refinance:
-
-$$
-\begin{aligned}
-\text{Savings} &= \text{Total Cost (Cash-Out Refi)} - \text{Total Cost (HEL + Current Mortgage)} \\
-&= \$970,243.20 - \$731,827.60 \\
-&= \$238,415.60
-\end{aligned}
-$$
-
-Savings Percentage:
-
-$$
-\text{Savings %} = \frac{\$238,415.60}{\$970,243.20} \times 100\% \approx 24.57\%
-$$
-
-## 5. Disclaimers
-
-- These calculations are for illustrative purposes only and may not reflect actual loan terms.
-- APR rates used are based on averages and may vary depending on individual circumstances and market conditions.
-- This analysis does not account for potential changes in interest rates, property values, or other economic factors over time.
-- Consult with a qualified financial advisor or loan officer for personalized advice and accurate loan information.
+Savings = Higher Cost Option - Lower Cost Option
