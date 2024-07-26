@@ -2,6 +2,7 @@
 const MAX_LTV = 0.85;
 const MIN_LTV = 0.05;
 const MIN_LOAN_AMOUNT = 1;
+const MAX_LOAN_AMOUNT = 500000;
 
 // Global variables
 let isCreditScoreApproved = true;
@@ -78,6 +79,9 @@ function handleDollarInputBlur(event) {
   let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
   if (isNaN(value) || value === 0) {
     value = input === homeValueInput ? 1 : MIN_LOAN_AMOUNT;
+  }
+  if (input === loanAmountInput) {
+    value = Math.min(value, MAX_LOAN_AMOUNT);
   }
   input.value = formatCurrency(value);
   calculateSavings();
@@ -169,6 +173,9 @@ function handleMortgageTermChange(increment) {
 function handleDollarAmountChange(input, increment) {
   let currentAmount = parseFloat(input.value.replace(/[^0-9.-]+/g, "")) || 0;
   currentAmount = Math.max(currentAmount + increment, 0);
+  if (input === loanAmountInput) {
+    currentAmount = Math.min(currentAmount, MAX_LOAN_AMOUNT);
+  }
   input.value = formatCurrency(currentAmount);
   debounce(calculateSavings, 500)();
 }
@@ -245,6 +252,10 @@ function calculateSavings() {
     loanAmount = Math.max(MIN_LOAN_AMOUNT, MIN_LTV * homeValue - currentMortgagePrincipal);
     loanAmountInput.value = formatCurrency(loanAmount);
   }
+
+  // Cap the loan amount at MAX_LOAN_AMOUNT
+  loanAmount = Math.min(loanAmount, MAX_LOAN_AMOUNT);
+  loanAmountInput.value = formatCurrency(loanAmount);
 
   // Calculate the current mortgage payment
   const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
