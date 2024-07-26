@@ -6,7 +6,7 @@ LTV = Loan Amount / Home Value
 
 ## Monthly Payment Calculation
 
-Monthly Payment = (P _ r _ (1 + r)^n) / ((1 + r)^n - 1)
+Monthly Payment = P _ r _ (1 + r)^n / ((1 + r)^n - 1)
 
 Where:
 
@@ -39,7 +39,11 @@ APR adjustments based on credit score:
 
 ## Cash-Out Refinance Rate Calculation
 
-Cash-Out Refi Rate = (Current Mortgage Principal _ Current Mortgage Rate + New Loan Amount _ (Current Mortgage Rate + 0.5%)) / Total Loan Amount
+```
+Cash-Out Refi Rate = (Current Mortgage Principal * Current Mortgage Rate +
+                      New Loan Amount * (Current Mortgage Rate + 0.5%)) /
+                     Total Loan Amount
+```
 
 ## Home Equity Investment (HEI) Repayment Calculation
 
@@ -48,6 +52,7 @@ Cash-Out Refi Rate = (Current Mortgage Principal _ Current Mortgage Rate + New L
 
 2. Calculate share of appreciation:
    Share of Appreciation = (Future Home Value - Appreciation Starting Amount) \* Point Percentage
+
    Where:
 
    - Appreciation Starting Amount = Round down(Current Home Value \* 0.73) to nearest $1000
@@ -68,7 +73,8 @@ Cash-Out Refi Rate = (Current Mortgage Principal _ Current Mortgage Rate + New L
    Total Cost = Monthly Payment \* Term in Months
 
 2. Home Equity Loan Total Cost:
-   Total Cost = (Current Mortgage Payment _ Remaining Mortgage Term in Months) + (HEL Monthly Payment _ HEL Term in Months)
+   Total Cost = (Current Mortgage Payment _ Remaining Mortgage Term in Months) +
+   (HEL Monthly Payment _ HEL Term in Months)
 
 3. HEI Total Cost:
    Total Cost = HEI Repayment Amount
@@ -76,35 +82,3 @@ Cash-Out Refi Rate = (Current Mortgage Principal _ Current Mortgage Rate + New L
 ## Savings Calculation
 
 Savings = Higher Cost Option - Lower Cost Option
-
-## Total Cost Calculations
-
-1. Cash-Out Refinance Total Cost:
-   Total Cost = Monthly Payment \* Term in Months
-
-2. Home Equity Loan Total Cost:
-   Total Cost = (Current Mortgage Payment _ Remaining Mortgage Term in Months) + (HEL Monthly Payment _ HEL Term in Months)
-
-3. HEI Total Cost:
-   Total Cost = HEI Repayment Amount
-
-4. Final HEI Repayment:
-   HEI Repayment = Minimum(Share-Based Repayment, Cap-Based Repayment)
-
-## Total Cost Calculations
-
-1. Cash-Out Refinance Total Cost:
-   Total Cost = Monthly Payment \* Term in Months
-
-2. Home Equity Loan Total Cost:
-   Total Cost = (Current Mortgage Payment _ Remaining Mortgage Term in Months) + (HEL Monthly Payment _ HEL Term in Months)
-
-   - Point Percentage = 2.2 \* (Loan Amount / Current Home Value)
-
-3. Calculate share-based repayment:
-   Share-Based Repayment = Share of Appreciation + Loan Amount
-
-4. Calculate cap-based repayment:
-   Cap-Based Repayment = Loan Amount _ (1 + 0.175 / 12)^(Years _ 12)
-
-5. Final HEI Repayment:
