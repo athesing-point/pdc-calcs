@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const cashRefiPayment = calculateMonthlyPayment(totalLoanAmount, cashOutRefiRate, selectedTerm);
     const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
-    const cashRefiOptionCost = totalCashRefiPayments; // Define cashRefiOptionCost here
+    const cashRefiOptionCost = totalCashRefiPayments;
     const savings = cashRefiOptionCost - homeEquityLoanOptionCost;
     console.log(`Savings: ${savings}`);
 
