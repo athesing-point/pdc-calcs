@@ -1,5 +1,5 @@
 // Constants
-const MAX_LTV = 0.85;
+const MAX_LTV = 0.8;
 const MIN_LTV = 0.05;
 const MIN_LOAN_AMOUNT = 1;
 const MAX_LOAN_AMOUNT = 500000;
@@ -312,10 +312,10 @@ function calculateSavings() {
   // Compare only HELoan and Cash-out refi for the better option text
   if (homeEquityLoanOptionCost <= cashRefiOptionCost) {
     savings = cashRefiOptionCost - homeEquityLoanOptionCost;
-    betterOptionText = "With a HE loan you would save";
+    betterOptionText = "With a home equity loan you would save:";
   } else {
     savings = homeEquityLoanOptionCost - cashRefiOptionCost;
-    betterOptionText = "With a Cash-out refi you would save";
+    betterOptionText = "With a cash-out refi you would save:";
   }
 
   savingsAmountElement.innerText = formatCurrencyWithSymbol(Math.abs(savings));
