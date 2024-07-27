@@ -1,7 +1,10 @@
 // Constants
-const MAX_LTV = 0.85;
+const MAX_LTV = 0.8;
 const MIN_LTV = 0.05;
 const MIN_LOAN_AMOUNT = 1;
+const MAX_LOAN_AMOUNT = 500000;
+const MIN_HOME_VALUE = 80000;
+const MIN_MORTGAGE_BALANCE = 10000;
 
 // Global variables
 let isCreditScoreApproved = true;
@@ -77,7 +80,20 @@ function handleDollarInputBlur(event) {
   const input = event.target;
   let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
   if (isNaN(value) || value === 0) {
-    value = input === homeValueInput ? 1 : MIN_LOAN_AMOUNT;
+    if (input === homeValueInput) {
+      value = MIN_HOME_VALUE;
+    } else if (input === currentMortgagePrincipalInput) {
+      value = MIN_MORTGAGE_BALANCE;
+    } else {
+      value = MIN_LOAN_AMOUNT;
+    }
+  }
+  if (input === homeValueInput) {
+    value = Math.max(value, MIN_HOME_VALUE);
+  } else if (input === currentMortgagePrincipalInput) {
+    value = Math.max(value, MIN_MORTGAGE_BALANCE);
+  } else if (input === loanAmountInput) {
+    value = Math.min(value, MAX_LOAN_AMOUNT);
   }
   input.value = formatCurrency(value);
   calculateSavings();
@@ -169,6 +185,9 @@ function handleMortgageTermChange(increment) {
 function handleDollarAmountChange(input, increment) {
   let currentAmount = parseFloat(input.value.replace(/[^0-9.-]+/g, "")) || 0;
   currentAmount = Math.max(currentAmount + increment, 0);
+  if (input === loanAmountInput) {
+    currentAmount = Math.min(currentAmount, MAX_LOAN_AMOUNT);
+  }
   input.value = formatCurrency(currentAmount);
   debounce(calculateSavings, 500)();
 }
@@ -228,8 +247,8 @@ function calculateSavings() {
   }
 
   // Update input values only if they're at the minimum value
-  if (homeValue === 1) homeValueInput.value = formatCurrency(homeValue);
-  if (currentMortgagePrincipal === MIN_LOAN_AMOUNT) currentMortgagePrincipalInput.value = formatCurrency(currentMortgagePrincipal);
+  if (homeValue === MIN_HOME_VALUE) homeValueInput.value = formatCurrency(homeValue);
+  if (currentMortgagePrincipal === MIN_MORTGAGE_BALANCE) currentMortgagePrincipalInput.value = formatCurrency(currentMortgagePrincipal);
   if (loanAmount === MIN_LOAN_AMOUNT) loanAmountInput.value = formatCurrency(loanAmount);
 
   let totalLoanAmount = currentMortgagePrincipal + loanAmount;
@@ -245,6 +264,10 @@ function calculateSavings() {
     loanAmount = Math.max(MIN_LOAN_AMOUNT, MIN_LTV * homeValue - currentMortgagePrincipal);
     loanAmountInput.value = formatCurrency(loanAmount);
   }
+
+  // Cap the loan amount at MAX_LOAN_AMOUNT
+  loanAmount = Math.min(loanAmount, MAX_LOAN_AMOUNT);
+  loanAmountInput.value = formatCurrency(loanAmount);
 
   // Calculate the current mortgage payment
   const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
@@ -289,10 +312,10 @@ function calculateSavings() {
   // Compare only HELoan and Cash-out refi for the better option text
   if (homeEquityLoanOptionCost <= cashRefiOptionCost) {
     savings = cashRefiOptionCost - homeEquityLoanOptionCost;
-    betterOptionText = "With a HELoan you would save";
+    betterOptionText = "With a home equity loan you would save:";
   } else {
     savings = homeEquityLoanOptionCost - cashRefiOptionCost;
-    betterOptionText = "With a Cash-out refi you would save";
+    betterOptionText = "With a cash-out refi you would save:";
   }
 
   savingsAmountElement.innerText = formatCurrencyWithSymbol(Math.abs(savings));
@@ -503,8 +526,8 @@ function addEnterKeyListener() {
 }
 
 function setDefaultValues() {
-  homeValueInput.value = formatCurrency(500000);
-  currentMortgagePrincipalInput.value = formatCurrency(275000);
+  homeValueInput.value = formatCurrency(Math.max(500000, MIN_HOME_VALUE));
+  currentMortgagePrincipalInput.value = formatCurrency(Math.max(275000, MIN_MORTGAGE_BALANCE));
   remainingMortgageTermInput.value = "20 yrs";
   currentMortgageRateInput.value = formatPercentage(7.75);
   loanAmountInput.value = formatCurrency(50000);
