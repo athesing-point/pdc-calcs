@@ -84,3 +84,41 @@ Cash-Out Refi Rate = (Current Mortgage Principal * Current Mortgage Rate + New L
 ## Savings Calculation
 
 Savings = Higher Cost Option - Lower Cost Option
+
+## Edge Cases and Input Adjustments
+
+1. Home Value:
+   - Minimum value: $1
+   - If input is below $1, it's set to $1
+
+2. Current Mortgage Principal and Loan Amount:
+   - Minimum value: $1
+   - If input is below $1, it's set to $1
+
+3. Remaining Mortgage Term:
+   - Range: 1 to 30 years
+   - If input is outside this range, it's clamped to the nearest valid value
+
+4. Current Mortgage Rate:
+   - Range: 1.5% to 15%
+   - If input is outside this range, it's clamped to the nearest valid value
+
+5. Loan-to-Value (LTV) Ratio:
+   - Minimum LTV: 5% (0.05)
+   - Maximum LTV: 85% (0.85)
+   - If LTV is outside this range, the loan amount is adjusted to bring LTV within range
+
+6. Maximum Loan Amount:
+   - $500,000
+   - If calculated loan amount exceeds this, it's capped at $500,000
+
+7. Credit Score:
+   - If credit score is "excellent", "very good", or "good", the loan is approved
+   - Other credit scores result in loan denial
+
+8. Arrow Key Adjustments:
+   - Mortgage Rate: ±0.1% per arrow key press
+   - Dollar Amounts: ±$1,000 per arrow key press (±$10,000 with Shift key)
+   - Mortgage Term: ±1 year per arrow key press
+
+These adjustments ensure that all inputs are within acceptable ranges and that the calculator produces meaningful results even when users provide edge case values.

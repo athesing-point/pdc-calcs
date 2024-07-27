@@ -3,6 +3,8 @@ const MAX_LTV = 0.85;
 const MIN_LTV = 0.05;
 const MIN_LOAN_AMOUNT = 1;
 const MAX_LOAN_AMOUNT = 500000;
+const MIN_HOME_VALUE = 80000;
+const MIN_MORTGAGE_BALANCE = 10000;
 
 // Global variables
 let isCreditScoreApproved = true;
@@ -78,9 +80,19 @@ function handleDollarInputBlur(event) {
   const input = event.target;
   let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
   if (isNaN(value) || value === 0) {
-    value = input === homeValueInput ? 1 : MIN_LOAN_AMOUNT;
+    if (input === homeValueInput) {
+      value = MIN_HOME_VALUE;
+    } else if (input === currentMortgagePrincipalInput) {
+      value = MIN_MORTGAGE_BALANCE;
+    } else {
+      value = MIN_LOAN_AMOUNT;
+    }
   }
-  if (input === loanAmountInput) {
+  if (input === homeValueInput) {
+    value = Math.max(value, MIN_HOME_VALUE);
+  } else if (input === currentMortgagePrincipalInput) {
+    value = Math.max(value, MIN_MORTGAGE_BALANCE);
+  } else if (input === loanAmountInput) {
     value = Math.min(value, MAX_LOAN_AMOUNT);
   }
   input.value = formatCurrency(value);
@@ -235,8 +247,8 @@ function calculateSavings() {
   }
 
   // Update input values only if they're at the minimum value
-  if (homeValue === 1) homeValueInput.value = formatCurrency(homeValue);
-  if (currentMortgagePrincipal === MIN_LOAN_AMOUNT) currentMortgagePrincipalInput.value = formatCurrency(currentMortgagePrincipal);
+  if (homeValue === MIN_HOME_VALUE) homeValueInput.value = formatCurrency(homeValue);
+  if (currentMortgagePrincipal === MIN_MORTGAGE_BALANCE) currentMortgagePrincipalInput.value = formatCurrency(currentMortgagePrincipal);
   if (loanAmount === MIN_LOAN_AMOUNT) loanAmountInput.value = formatCurrency(loanAmount);
 
   let totalLoanAmount = currentMortgagePrincipal + loanAmount;
@@ -514,8 +526,8 @@ function addEnterKeyListener() {
 }
 
 function setDefaultValues() {
-  homeValueInput.value = formatCurrency(500000);
-  currentMortgagePrincipalInput.value = formatCurrency(275000);
+  homeValueInput.value = formatCurrency(Math.max(500000, MIN_HOME_VALUE));
+  currentMortgagePrincipalInput.value = formatCurrency(Math.max(275000, MIN_MORTGAGE_BALANCE));
   remainingMortgageTermInput.value = "20 yrs";
   currentMortgageRateInput.value = formatPercentage(7.75);
   loanAmountInput.value = formatCurrency(50000);
