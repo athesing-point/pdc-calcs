@@ -366,17 +366,18 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   const homeEquityLoanPayment = calculateHomeEquityLoanPayment(loanAmount, homeEquityLoanAPR, selectedTerm);
 
   const totalCashRefiPrincipal = currentMortgagePrincipal + loanAmount;
-  const totalHELPrincipal = loanAmount;
+  const helPrincipal = loanAmount;
+  const helPayment = calculateHomeEquityLoanPayment(helPrincipal, homeEquityLoanAPR, selectedTerm);
+  const totalHELPayments = helPayment * selectedTerm * 12;
+  const totalHELInterestCost = totalHELPayments - helPrincipal;
 
   const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
   const totalExistingMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
-  const totalHELPayments = homeEquityLoanPayment * selectedTerm * 12;
   const totalHomeEquityLoanPayments = totalExistingMortgagePayments + totalHELPayments;
 
   const totalInterestCostCashOutRefi = totalCashRefiPayments - totalCashRefiPrincipal;
-  const totalInterestCostHEL = totalHomeEquityLoanPayments - (currentMortgagePrincipal + totalHELPrincipal);
 
-  if (isNaN(cashRefiPayment) || isNaN(homeEquityLoanPayment) || isNaN(totalCashRefiPrincipal) || isNaN(totalInterestCostCashOutRefi) || isNaN(totalInterestCostHEL) || isNaN(totalCashRefiPayments) || isNaN(totalHomeEquityLoanPayments)) {
+  if (isNaN(cashRefiPayment) || isNaN(homeEquityLoanPayment) || isNaN(totalCashRefiPrincipal) || isNaN(totalInterestCostCashOutRefi) || isNaN(totalHELInterestCost) || isNaN(totalCashRefiPayments) || isNaN(totalHomeEquityLoanPayments)) {
     return;
   }
 
@@ -388,10 +389,10 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   document.querySelector('[calc-result="hel-monthly-payment"]').innerText = formatCurrencyWithSymbol(homeEquityLoanPayment);
 
   document.querySelector('[calc-result="cash-out-refi-total-principal"]').innerText = formatCurrencyWithSymbol(totalCashRefiPrincipal);
-  document.querySelector('[calc-result="hel-total-principal"]').innerText = formatCurrencyWithSymbol(totalHELPrincipal);
+  document.querySelector('[calc-result="hel-total-principal"]').innerText = formatCurrencyWithSymbol(helPrincipal);
 
   document.querySelector('[calc-result="cash-out-refi-total-interest-cost"]').innerText = formatCurrencyWithSymbol(totalInterestCostCashOutRefi);
-  document.querySelector('[calc-result="hel-total-interest-cost"]').innerText = formatCurrencyWithSymbol(totalInterestCostHEL);
+  document.querySelector('[calc-result="hel-total-interest-cost"]').innerText = formatCurrencyWithSymbol(totalHELInterestCost);
 
   document.querySelector('[calc-result="cash-out-refi-total-cost"]').innerText = formatCurrencyWithSymbol(totalCashRefiPayments);
   document.querySelector('[calc-result="hel-total-cost"]').innerText = formatCurrencyWithSymbol(totalHomeEquityLoanPayments);
