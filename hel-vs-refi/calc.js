@@ -36,6 +36,22 @@ function formatPercentage(value) {
   return parseFloat(value).toFixed(2) + "%";
 }
 
+function formatYear(value) {
+  if (isNaN(value) || value === undefined) return "0 yrs";
+  return parseFloat(value) + " yrs";
+}
+
+// Modifier functions
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function roundToDecimal(value, decimalPlaces) {
+  const multiplier = Math.pow(10, decimalPlaces);
+  return Math.round(value * multiplier) / multiplier;
+}
+
+// Debounce function
 function debounce(func, delay) {
   let timeout;
   return (...args) => {
@@ -44,18 +60,30 @@ function debounce(func, delay) {
   };
 }
 
+// Generic input handler creator
+function createInputHandler(formatFunction, minValue, maxValue, additionalModifier = (x) => x) {
+  return debounce(function (event) {
+    const input = event.target;
+    let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
+    value = clamp(value, minValue, maxValue);
+    value = additionalModifier(value);
+    input.value = formatFunction(value);
+    calculateSavings();
+  }, 500);
+}
+
 // Event handlers
 function handleNumericInput(event) {
   const input = event.target;
-  let numericValue = input.value.replace(/[^0-9.]/g, "");
-  if (input.getAttribute("input-format") === "dollar") {
-    input.value = numericValue ? formatCurrency(parseFloat(numericValue)) : "";
-  } else if (input.getAttribute("input-format") === "percent") {
-    input.value = numericValue ? formatPercentage(parseFloat(numericValue)) : "";
-  } else if (input.getAttribute("input-format") === "year") {
-    input.value = numericValue ? parseFloat(numericValue) + " yrs" : "";
+  const inputFormat = input.getAttribute("input-format");
+
+  if (inputFormat === "dollar") {
+    createInputHandler(formatCurrency, MIN_LOAN_AMOUNT, MAX_LOAN_AMOUNT)(event);
+  } else if (inputFormat === "percent") {
+    createInputHandler(formatPercentage, 1.5, 15, (value) => roundToDecimal(value, 2))(event);
+  } else if (inputFormat === "year") {
+    createInputHandler(formatYear, 1, 30, Math.round)(event);
   }
-  calculateSavings();
 }
 
 function preventNonNumericInput(event) {
@@ -65,77 +93,32 @@ function preventNonNumericInput(event) {
 }
 
 function handleDollarInput(event) {
-  const input = event.target;
-  let value = input.value.replace(/[^0-9.-]+/g, "");
-  if (value !== "") {
-    value = parseFloat(value);
-    if (!isNaN(value)) {
-      input.value = formatCurrency(value);
-    }
-  }
-  calculateSavings();
+  createInputHandler(formatCurrency, MIN_LOAN_AMOUNT, MAX_LOAN_AMOUNT)(event);
 }
 
 function handleDollarInputBlur(event) {
   const input = event.target;
-  let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
-  if (isNaN(value) || value === 0) {
-    if (input === homeValueInput) {
-      value = MIN_HOME_VALUE;
-    } else if (input === currentMortgagePrincipalInput) {
-      value = MIN_MORTGAGE_BALANCE;
-    } else {
-      value = MIN_LOAN_AMOUNT;
-    }
-  }
+  let minValue = MIN_LOAN_AMOUNT;
+
   if (input === homeValueInput) {
-    value = Math.max(value, MIN_HOME_VALUE);
+    minValue = MIN_HOME_VALUE;
   } else if (input === currentMortgagePrincipalInput) {
-    value = Math.max(value, MIN_MORTGAGE_BALANCE);
-  } else if (input === loanAmountInput) {
-    value = Math.min(value, MAX_LOAN_AMOUNT);
+    minValue = MIN_MORTGAGE_BALANCE;
   }
-  input.value = formatCurrency(value);
-  calculateSavings();
+
+  createInputHandler(formatCurrency, minValue, input === loanAmountInput ? MAX_LOAN_AMOUNT : Infinity)(event);
 }
 
 function handleMortgageTermInput() {
-  let value = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
-  value = Math.min(Math.max(value, 1), 30);
-  remainingMortgageTermInput.value = isNaN(value) ? "" : value + " yrs";
-  calculateSavings();
+  createInputHandler(formatYear, 1, 30, Math.round)(event);
 }
 
 function handleMortgageRateInput(event) {
-  let value = currentMortgageRateInput.value.replace(/[^0-9.]/g, "");
-  let cursorPosition = event.target.selectionStart;
-  let dotIndex = value.indexOf(".");
-
-  if (dotIndex !== -1 && value.length - dotIndex > 3) {
-    value = value.slice(0, dotIndex + 3);
-  }
-
-  let numValue = parseFloat(value);
-  if (!isNaN(numValue)) {
-    numValue = Math.min(Math.max(numValue, 1.5), 15);
-    value = numValue.toFixed(2);
-  }
-
-  currentMortgageRateInput.value = value ? value + "%" : "";
-
-  if (value) {
-    cursorPosition += currentMortgageRateInput.value.length - value.length;
-  }
-  currentMortgageRateInput.setSelectionRange(cursorPosition, cursorPosition);
-
-  debounce(calculateSavings, 500)();
+  createInputHandler(formatPercentage, 1.5, 15, (value) => roundToDecimal(value, 2))(event);
 }
 
 function handleMortgageRateInputBlur() {
-  let value = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, ""));
-  value = Math.min(Math.max(value, 1.5), 15);
-  currentMortgageRateInput.value = isNaN(value) ? "" : formatPercentage(value);
-  calculateSavings();
+  createInputHandler(formatPercentage, 1.5, 15, (value) => roundToDecimal(value, 2))(event);
 }
 
 function updateHomeEquityLoanAPR() {
@@ -366,18 +349,21 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   const homeEquityLoanPayment = calculateHomeEquityLoanPayment(loanAmount, homeEquityLoanAPR, selectedTerm);
 
   const totalCashRefiPrincipal = currentMortgagePrincipal + loanAmount;
-  const helPrincipal = loanAmount;
-  const helPayment = calculateHomeEquityLoanPayment(helPrincipal, homeEquityLoanAPR, selectedTerm);
-  const totalHELPayments = helPayment * selectedTerm * 12;
-  const totalHELInterestCost = totalHELPayments - helPrincipal;
+  const totalHELPrincipal = loanAmount;
 
   const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
+<<<<<<< HEAD
+  const totalHomeEquityLoanPayments = currentMortgagePayment * remainingMortgageTerm * 12 + homeEquityLoanPayment * selectedTerm * 12;
+=======
   const totalExistingMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
+  const totalHELPayments = homeEquityLoanPayment * selectedTerm * 12;
   const totalHomeEquityLoanPayments = totalExistingMortgagePayments + totalHELPayments;
+>>>>>>> parent of 1805760 (HEL table adjustments)
 
   const totalInterestCostCashOutRefi = totalCashRefiPayments - totalCashRefiPrincipal;
+  const totalInterestCostHEL = totalHomeEquityLoanPayments - (currentMortgagePrincipal + totalHELPrincipal);
 
-  if (isNaN(cashRefiPayment) || isNaN(homeEquityLoanPayment) || isNaN(totalCashRefiPrincipal) || isNaN(totalInterestCostCashOutRefi) || isNaN(totalHELInterestCost) || isNaN(totalCashRefiPayments) || isNaN(totalHomeEquityLoanPayments)) {
+  if (isNaN(cashRefiPayment) || isNaN(homeEquityLoanPayment) || isNaN(totalCashRefiPrincipal) || isNaN(totalInterestCostCashOutRefi) || isNaN(totalInterestCostHEL) || isNaN(totalCashRefiPayments) || isNaN(totalHomeEquityLoanPayments)) {
     return;
   }
 
@@ -389,10 +375,10 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   document.querySelector('[calc-result="hel-monthly-payment"]').innerText = formatCurrencyWithSymbol(homeEquityLoanPayment);
 
   document.querySelector('[calc-result="cash-out-refi-total-principal"]').innerText = formatCurrencyWithSymbol(totalCashRefiPrincipal);
-  document.querySelector('[calc-result="hel-total-principal"]').innerText = formatCurrencyWithSymbol(helPrincipal);
+  document.querySelector('[calc-result="hel-total-principal"]').innerText = formatCurrencyWithSymbol(totalHELPrincipal);
 
   document.querySelector('[calc-result="cash-out-refi-total-interest-cost"]').innerText = formatCurrencyWithSymbol(totalInterestCostCashOutRefi);
-  document.querySelector('[calc-result="hel-total-interest-cost"]').innerText = formatCurrencyWithSymbol(totalHELInterestCost);
+  document.querySelector('[calc-result="hel-total-interest-cost"]').innerText = formatCurrencyWithSymbol(totalInterestCostHEL);
 
   document.querySelector('[calc-result="cash-out-refi-total-cost"]').innerText = formatCurrencyWithSymbol(totalCashRefiPayments);
   document.querySelector('[calc-result="hel-total-cost"]').innerText = formatCurrencyWithSymbol(totalHomeEquityLoanPayments);
