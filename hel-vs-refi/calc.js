@@ -36,22 +36,6 @@ function formatPercentage(value) {
   return parseFloat(value).toFixed(2) + "%";
 }
 
-function formatYear(value) {
-  if (isNaN(value) || value === undefined) return "0 yrs";
-  return parseFloat(value) + " yrs";
-}
-
-// Modifier functions
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function roundToDecimal(value, decimalPlaces) {
-  const multiplier = Math.pow(10, decimalPlaces);
-  return Math.round(value * multiplier) / multiplier;
-}
-
-// Debounce function
 function debounce(func, delay) {
   let timeout;
   return (...args) => {
@@ -60,30 +44,18 @@ function debounce(func, delay) {
   };
 }
 
-// Generic input handler creator
-function createInputHandler(formatFunction, minValue, maxValue, additionalModifier = (x) => x) {
-  return debounce(function (event) {
-    const input = event.target;
-    let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
-    value = clamp(value, minValue, maxValue);
-    value = additionalModifier(value);
-    input.value = formatFunction(value);
-    calculateSavings();
-  }, 500);
-}
-
 // Event handlers
 function handleNumericInput(event) {
   const input = event.target;
-  const inputFormat = input.getAttribute("input-format");
-
-  if (inputFormat === "dollar") {
-    createInputHandler(formatCurrency, MIN_LOAN_AMOUNT, MAX_LOAN_AMOUNT)(event);
-  } else if (inputFormat === "percent") {
-    createInputHandler(formatPercentage, 1.5, 15, (value) => roundToDecimal(value, 2))(event);
-  } else if (inputFormat === "year") {
-    createInputHandler(formatYear, 1, 30, Math.round)(event);
+  let numericValue = input.value.replace(/[^0-9.]/g, "");
+  if (input.getAttribute("input-format") === "dollar") {
+    input.value = numericValue ? formatCurrency(parseFloat(numericValue)) : "";
+  } else if (input.getAttribute("input-format") === "percent") {
+    input.value = numericValue ? formatPercentage(parseFloat(numericValue)) : "";
+  } else if (input.getAttribute("input-format") === "year") {
+    input.value = numericValue ? parseFloat(numericValue) + " yrs" : "";
   }
+  calculateSavings();
 }
 
 function preventNonNumericInput(event) {
@@ -93,32 +65,77 @@ function preventNonNumericInput(event) {
 }
 
 function handleDollarInput(event) {
-  createInputHandler(formatCurrency, MIN_LOAN_AMOUNT, MAX_LOAN_AMOUNT)(event);
+  const input = event.target;
+  let value = input.value.replace(/[^0-9.-]+/g, "");
+  if (value !== "") {
+    value = parseFloat(value);
+    if (!isNaN(value)) {
+      input.value = formatCurrency(value);
+    }
+  }
+  calculateSavings();
 }
 
 function handleDollarInputBlur(event) {
   const input = event.target;
-  let minValue = MIN_LOAN_AMOUNT;
-
-  if (input === homeValueInput) {
-    minValue = MIN_HOME_VALUE;
-  } else if (input === currentMortgagePrincipalInput) {
-    minValue = MIN_MORTGAGE_BALANCE;
+  let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
+  if (isNaN(value) || value === 0) {
+    if (input === homeValueInput) {
+      value = MIN_HOME_VALUE;
+    } else if (input === currentMortgagePrincipalInput) {
+      value = MIN_MORTGAGE_BALANCE;
+    } else {
+      value = MIN_LOAN_AMOUNT;
+    }
   }
-
-  createInputHandler(formatCurrency, minValue, input === loanAmountInput ? MAX_LOAN_AMOUNT : Infinity)(event);
+  if (input === homeValueInput) {
+    value = Math.max(value, MIN_HOME_VALUE);
+  } else if (input === currentMortgagePrincipalInput) {
+    value = Math.max(value, MIN_MORTGAGE_BALANCE);
+  } else if (input === loanAmountInput) {
+    value = Math.min(value, MAX_LOAN_AMOUNT);
+  }
+  input.value = formatCurrency(value);
+  calculateSavings();
 }
 
 function handleMortgageTermInput() {
-  createInputHandler(formatYear, 1, 30, Math.round)(event);
+  let value = parseFloat(remainingMortgageTermInput.value.replace(/[^0-9.-]+/g, ""));
+  value = Math.min(Math.max(value, 1), 30);
+  remainingMortgageTermInput.value = isNaN(value) ? "" : value + " yrs";
+  calculateSavings();
 }
 
 function handleMortgageRateInput(event) {
-  createInputHandler(formatPercentage, 1.5, 15, (value) => roundToDecimal(value, 2))(event);
+  let value = currentMortgageRateInput.value.replace(/[^0-9.]/g, "");
+  let cursorPosition = event.target.selectionStart;
+  let dotIndex = value.indexOf(".");
+
+  if (dotIndex !== -1 && value.length - dotIndex > 3) {
+    value = value.slice(0, dotIndex + 3);
+  }
+
+  let numValue = parseFloat(value);
+  if (!isNaN(numValue)) {
+    numValue = Math.min(Math.max(numValue, 1.5), 15);
+    value = numValue.toFixed(2);
+  }
+
+  currentMortgageRateInput.value = value ? value + "%" : "";
+
+  if (value) {
+    cursorPosition += currentMortgageRateInput.value.length - value.length;
+  }
+  currentMortgageRateInput.setSelectionRange(cursorPosition, cursorPosition);
+
+  debounce(calculateSavings, 500)();
 }
 
 function handleMortgageRateInputBlur() {
-  createInputHandler(formatPercentage, 1.5, 15, (value) => roundToDecimal(value, 2))(event);
+  let value = parseFloat(currentMortgageRateInput.value.replace(/[^0-9.-]+/g, ""));
+  value = Math.min(Math.max(value, 1.5), 15);
+  currentMortgageRateInput.value = isNaN(value) ? "" : formatPercentage(value);
+  calculateSavings();
 }
 
 function updateHomeEquityLoanAPR() {
@@ -352,13 +369,9 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   const totalHELPrincipal = loanAmount;
 
   const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
-<<<<<<< HEAD
-  const totalHomeEquityLoanPayments = currentMortgagePayment * remainingMortgageTerm * 12 + homeEquityLoanPayment * selectedTerm * 12;
-=======
   const totalExistingMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
   const totalHELPayments = homeEquityLoanPayment * selectedTerm * 12;
   const totalHomeEquityLoanPayments = totalExistingMortgagePayments + totalHELPayments;
->>>>>>> parent of 1805760 (HEL table adjustments)
 
   const totalInterestCostCashOutRefi = totalCashRefiPayments - totalCashRefiPrincipal;
   const totalInterestCostHEL = totalHomeEquityLoanPayments - (currentMortgagePrincipal + totalHELPrincipal);
