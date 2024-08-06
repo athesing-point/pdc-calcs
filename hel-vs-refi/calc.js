@@ -337,13 +337,22 @@ function calculateSavings() {
   document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
 
   if (isApproved) {
-    // Perform calculations and update table values for HEL and Cash Out Refi
+    // Perform calculations and update table values for all options
     calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
   } else {
     // Set only HEL and Cash Out Refi column values to zero
     document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
       el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
     });
+
+    // Calculate and update HEI values even when not approved
+    const heiValues = calculateHEIValues(selectedTerm);
+    const heiOptionCost = heiValues.repayment;
+    const heiFinanceCost = heiOptionCost - loanAmount;
+
+    document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
+    document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
+    document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
   }
 
   // Find the lowest cost option
@@ -436,15 +445,24 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   document.querySelector('[calc-result="cash-out-refi-total-cost"]').innerText = formatCurrencyWithSymbol(totalCashRefiPayments);
   document.querySelector('[calc-result="hel-total-cost"]').innerText = formatCurrencyWithSymbol(totalHomeEquityLoanPayments);
 
+  // Calculate HEI values
+  const heiValues = calculateHEIValues(selectedTerm);
+  const heiOptionCost = heiValues.repayment;
+  const heiFinanceCost = heiOptionCost - loanAmount;
+
+  // Update HEI values in the table
+  document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
+  document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
+  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
+
   // Calculate total costs for each option
   const totalCashRefiCost = totalCashRefiPayments;
   const totalHELCost = totalHomeEquityLoanPayments;
   const totalHEICost = heiOptionCost;
 
-  // Find the lowest cost option
+  // Find the lowest cost option and update table styling
   const lowestCost = Math.min(totalCashRefiCost, totalHELCost, totalHEICost);
 
-  // Update table styling based on lowest cost
   const cashoutElements = document.querySelectorAll('[calc-result^="cash-out-refi-"]');
   const helElements = document.querySelectorAll('[calc-result^="hel-"]');
   const heiElements = document.querySelectorAll('[calc-result^="hei-"]');
@@ -466,7 +484,6 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
     });
   });
 
-  // Update table headers
   document.querySelector("#cashout-table").classList.toggle("text-color-black", totalCashRefiCost === lowestCost);
   document.querySelector("#hel-table").classList.toggle("text-color-black", totalHELCost === lowestCost);
   document.querySelector("#hei-table").classList.toggle("text-color-black", totalHEICost === lowestCost);
