@@ -374,28 +374,26 @@ function calculateSavings() {
   if (helTable) helTable.classList.toggle("text-color-black", lowestCost === homeEquityLoanOptionCost);
   if (heiTable) heiTable.classList.toggle("text-color-black", lowestCost === heiOptionCost);
 
-  // Update the table values
+  // Always calculate HEI values
+  const heiValues = calculateHEIValues(selectedTerm);
+  const heiRepayment = heiValues.repayment;
+  const heiOptionCost = heiRepayment;
+  const heiFinanceCost = heiOptionCost - loanAmount;
+
+  // Always update HEI table values
+  document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
+  document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
+  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
+
   if (isApproved) {
+    // Perform calculations and update table values for HEL and Cash Out Refi
     calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
   } else {
     // Set only HEL and Cash Out Refi column values to zero
     document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
       el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
     });
-
-    // Recalculate the HEI values to ensure they're displayed correctly
-    const heiRepayment = heiValues.repayment;
-    const heiOptionCost = heiRepayment;
-    const heiFinanceCost = heiOptionCost - loanAmount;
-
-    document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
-    document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
-    document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
   }
-
-  // Always calculate HEI values
-  const heiValues = calculateHEIValues(selectedTerm);
-  updateHEITableValues(heiValues, loanAmount);
 }
 
 function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
