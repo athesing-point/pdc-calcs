@@ -344,15 +344,6 @@ function calculateSavings() {
     document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
       el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
     });
-
-    // Calculate and update HEI values even when not approved
-    const heiValues = calculateHEIValues(selectedTerm);
-    const heiOptionCost = heiValues.repayment;
-    const heiFinanceCost = heiOptionCost - loanAmount;
-
-    document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
-    document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
-    document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
   }
 
   // Find the lowest cost option
