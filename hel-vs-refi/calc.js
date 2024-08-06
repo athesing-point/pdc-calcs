@@ -255,7 +255,7 @@ function calculateSavings() {
   let ltv = calculateLTV(totalLoanAmount, homeValue);
   let isLtvApproved = ltv >= MIN_LTV && ltv <= MAX_LTV;
 
-  updateApprovalStatus(isLtvApproved);
+  let isApproved = updateApprovalStatus(isLtvApproved);
 
   if (ltv > MAX_LTV) {
     loanAmount = Math.max(MIN_LOAN_AMOUNT, MAX_LTV * homeValue - currentMortgagePrincipal);
@@ -273,9 +273,8 @@ function calculateSavings() {
   const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
 
   // Calculate the effective cash-out refinance rate
-  const cashOutRefiRate = (currentMortgagePrincipal * currentMortgageRate + loanAmount * (currentMortgageRate + 0.005)) / totalLoanAmount;
-
   const homeEquityLoanAPR = calculateHomeEquityLoanAPR(creditScoreInput.value);
+  const cashOutRefiRate = (currentMortgagePrincipal * currentMortgageRate + loanAmount * homeEquityLoanAPR) / totalLoanAmount;
 
   const homeEquityLoanPayment = calculateHomeEquityLoanPayment(loanAmount, homeEquityLoanAPR, selectedTerm);
 
@@ -294,7 +293,33 @@ function calculateSavings() {
     const appreciation = 0.035;
     const appreciationStartingAmount = Math.round((homeValue * 0.73) / 1000) * 1000;
     const homeValueForYear = homeValue * Math.pow(1 + appreciation, years);
-    const simpleAppreciationMultiple = 2.2;
+
+    // Determine the simple appreciation multiple based on credit score
+    const creditScoreText = creditScoreInput.value.toLowerCase();
+    let simpleAppreciationMultiple;
+    switch (creditScoreText) {
+      case "very low":
+        simpleAppreciationMultiple = 3.04;
+        break;
+      case "low":
+        simpleAppreciationMultiple = 2.56;
+        break;
+      case "average":
+        simpleAppreciationMultiple = 2.48;
+        break;
+      case "good":
+        simpleAppreciationMultiple = 2.32;
+        break;
+      case "very good":
+        simpleAppreciationMultiple = 2.2;
+        break;
+      case "excellent":
+        simpleAppreciationMultiple = 2.2;
+        break;
+      default:
+        simpleAppreciationMultiple = 2.2; // Default value if no match
+    }
+
     const pointPercentage = simpleAppreciationMultiple * (loanAmount / homeValue);
     const shareOfAppreciation = (homeValueForYear - appreciationStartingAmount) * pointPercentage;
     const shareBasedRepayment = shareOfAppreciation + loanAmount;
@@ -350,7 +375,14 @@ function calculateSavings() {
   if (heiTable) heiTable.classList.toggle("text-color-black", lowestCost === heiOptionCost);
 
   // Update the table values
-  calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
+  if (isApproved) {
+    calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
+  } else {
+    // Set HEL and Cash Out Refi column values to zero
+    document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
+      el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
+    });
+  }
 }
 
 function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
@@ -403,7 +435,33 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
     const appreciation = 0.035;
     const appreciationStartingAmount = Math.round((homeValue * 0.73) / 1000) * 1000;
     const homeValueForYear = homeValue * Math.pow(1 + appreciation, years);
-    const simpleAppreciationMultiple = 2.2;
+
+    // Determine the simple appreciation multiple based on credit score
+    const creditScoreText = creditScoreInput.value.toLowerCase();
+    let simpleAppreciationMultiple;
+    switch (creditScoreText) {
+      case "very low":
+        simpleAppreciationMultiple = 3.04;
+        break;
+      case "low":
+        simpleAppreciationMultiple = 2.56;
+        break;
+      case "average":
+        simpleAppreciationMultiple = 2.48;
+        break;
+      case "good":
+        simpleAppreciationMultiple = 2.32;
+        break;
+      case "very good":
+        simpleAppreciationMultiple = 2.2;
+        break;
+      case "excellent":
+        simpleAppreciationMultiple = 2.2;
+        break;
+      default:
+        simpleAppreciationMultiple = 2.2; // Default value if no match
+    }
+
     const pointPercentage = simpleAppreciationMultiple * (loanAmount / homeValue);
     const shareOfAppreciation = (homeValueForYear - appreciationStartingAmount) * pointPercentage;
     const shareBasedRepayment = shareOfAppreciation + loanAmount;
@@ -466,13 +524,13 @@ function updateApprovalStatus(isLtvApproved) {
     if (isApproved) {
       approvalTrueCard.classList.remove("hide");
       approvalFalseCard.classList.add("hide");
-      calcAccordion.classList.remove("hide");
     } else {
       approvalTrueCard.classList.add("hide");
       approvalFalseCard.classList.remove("hide");
-      calcAccordion.classList.add("hide");
     }
   }
+
+  return isApproved;
 }
 
 // Initialization
