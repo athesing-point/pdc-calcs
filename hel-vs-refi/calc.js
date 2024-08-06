@@ -329,6 +329,22 @@ function calculateSavings() {
 
   const heiRepayment = calculateHEIValues(selectedTerm);
   const heiOptionCost = heiRepayment;
+  const heiFinanceCost = heiOptionCost - loanAmount;
+
+  // Always update HEI table values
+  document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
+  document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
+  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
+
+  if (isApproved) {
+    // Perform calculations and update table values for HEL and Cash Out Refi
+    calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
+  } else {
+    // Set only HEL and Cash Out Refi column values to zero
+    document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
+      el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
+    });
+  }
 
   // Find the lowest cost option
   const lowestCost = Math.min(homeEquityLoanOptionCost, cashRefiOptionCost, heiOptionCost);
@@ -373,27 +389,6 @@ function calculateSavings() {
   if (cashoutTable) cashoutTable.classList.toggle("text-color-black", lowestCost === cashRefiOptionCost);
   if (helTable) helTable.classList.toggle("text-color-black", lowestCost === homeEquityLoanOptionCost);
   if (heiTable) heiTable.classList.toggle("text-color-black", lowestCost === heiOptionCost);
-
-  // Always calculate HEI values
-  const heiValues = calculateHEIValues(selectedTerm);
-  const heiRepayment = heiValues.repayment;
-  const heiOptionCost = heiRepayment;
-  const heiFinanceCost = heiOptionCost - loanAmount;
-
-  // Always update HEI table values
-  document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
-  document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
-  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
-
-  if (isApproved) {
-    // Perform calculations and update table values for HEL and Cash Out Refi
-    calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
-  } else {
-    // Set only HEL and Cash Out Refi column values to zero
-    document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
-      el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
-    });
-  }
 }
 
 function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
@@ -440,54 +435,6 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
 
   document.querySelector('[calc-result="cash-out-refi-total-cost"]').innerText = formatCurrencyWithSymbol(totalCashRefiPayments);
   document.querySelector('[calc-result="hel-total-cost"]').innerText = formatCurrencyWithSymbol(totalHomeEquityLoanPayments);
-
-  // Calculate HEI values
-  const calculateHEIValues = (years) => {
-    const appreciation = 0.035;
-    const appreciationStartingAmount = Math.round((homeValue * 0.73) / 1000) * 1000;
-    const homeValueForYear = homeValue * Math.pow(1 + appreciation, years);
-
-    // Determine the simple appreciation multiple based on credit score
-    const creditScoreText = creditScoreInput.value.toLowerCase();
-    let simpleAppreciationMultiple;
-    switch (creditScoreText) {
-      case "very low":
-        simpleAppreciationMultiple = 3.04;
-        break;
-      case "low":
-        simpleAppreciationMultiple = 2.56;
-        break;
-      case "average":
-        simpleAppreciationMultiple = 2.48;
-        break;
-      case "good":
-        simpleAppreciationMultiple = 2.32;
-        break;
-      case "very good":
-        simpleAppreciationMultiple = 2.2;
-        break;
-      case "excellent":
-        simpleAppreciationMultiple = 2.2;
-        break;
-      default:
-        simpleAppreciationMultiple = 2.2; // Default value if no match
-    }
-
-    const pointPercentage = simpleAppreciationMultiple * (loanAmount / homeValue);
-    const shareOfAppreciation = (homeValueForYear - appreciationStartingAmount) * pointPercentage;
-    const shareBasedRepayment = shareOfAppreciation + loanAmount;
-    const capBasedRepayment = loanAmount * Math.pow(1 + 0.175 / 12, years * 12);
-    return Math.min(capBasedRepayment, shareBasedRepayment);
-  };
-
-  const heiRepayment = calculateHEIValues(selectedTerm);
-  const heiOptionCost = heiRepayment;
-  const heiFinanceCost = heiOptionCost - loanAmount;
-
-  // Update the table with HEI values
-  document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
-  document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
-  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
 
   // Calculate total costs for each option
   const totalCashRefiCost = totalCashRefiPayments;
@@ -584,16 +531,6 @@ function calculateHEIValues(years) {
   const repayment = Math.min(capBasedRepayment, shareBasedRepayment);
 
   return { repayment };
-}
-
-function updateHEITableValues(heiValues, loanAmount) {
-  const heiOptionCost = heiValues.repayment;
-  const heiFinanceCost = heiOptionCost - loanAmount;
-
-  // Update the table with HEI values
-  document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
-  document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
-  document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
 }
 
 // Initialization
