@@ -233,6 +233,12 @@ function calculateHomeEquityLoanAPR(creditScoreText) {
   }
 }
 
+function calculateCashOutRefiRate(creditScoreText) {
+  const helRate = calculateHomeEquityLoanAPR(creditScoreText);
+  const cashOutRefiAdjustment = -0.005;
+  return Math.max(helRate + cashOutRefiAdjustment, 0.03);
+}
+
 // Main calculation function
 function calculateSavings() {
   let homeValue = parseFloat(homeValueInput.value.replace(/[^0-9.-]+/g, "")) || 0;
@@ -274,7 +280,7 @@ function calculateSavings() {
 
   // Calculate the effective cash-out refinance rate
   const homeEquityLoanAPR = calculateHomeEquityLoanAPR(creditScoreInput.value);
-  const cashOutRefiRate = (currentMortgagePrincipal * currentMortgageRate + loanAmount * homeEquityLoanAPR) / totalLoanAmount;
+  const cashOutRefiRate = calculateCashOutRefiRate(creditScoreInput.value);
 
   const homeEquityLoanPayment = calculateHomeEquityLoanPayment(loanAmount, homeEquityLoanAPR, selectedTerm);
 
@@ -339,11 +345,24 @@ function calculateSavings() {
   if (isApproved) {
     // Perform calculations and update table values for all options
     calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
+
+    // Find the lowest cost option
+    const lowestCost = Math.min(homeEquityLoanOptionCost, cashRefiOptionCost, heiOptionCost);
+
+    // Update table styling
+    updateTableStyling(lowestCost, homeEquityLoanOptionCost, cashRefiOptionCost, heiOptionCost);
   } else {
     // Set only HEL and Cash Out Refi column values to zero
     document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
       el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
     });
+
+    // Remove highlighting from HEL and Cash Out Refi columns
+    removeHighlighting("#cashout-table");
+    removeHighlighting("#hel-table");
+
+    // Only consider HEI for highlighting when not approved
+    updateTableStyling(heiOptionCost, Infinity, Infinity, heiOptionCost);
   }
 
   // Find the lowest cost option
@@ -364,31 +383,6 @@ function calculateSavings() {
   // Update the better option text
   const betterOptionTextElement = document.querySelector('[calc-result="better-option"]');
   if (betterOptionTextElement) betterOptionTextElement.textContent = betterOptionText;
-
-  // Update table styling
-  const cashoutTable = document.querySelector("#cashout-table");
-  const helTable = document.querySelector("#hel-table");
-  const heiTable = document.querySelector("#hei-table");
-  const cashoutElements = document.querySelectorAll('[calc-result^="cash-out-refi-"]');
-  const helElements = document.querySelectorAll('[calc-result^="hel-"]');
-  const heiElements = document.querySelectorAll('[calc-result^="hei-"]');
-
-  [cashoutElements, helElements, heiElements].forEach((elements, index) => {
-    const isWinner = (index === 0 && lowestCost === cashRefiOptionCost) || (index === 1 && lowestCost === homeEquityLoanOptionCost) || (index === 2 && lowestCost === heiOptionCost);
-    elements.forEach((el) => {
-      if (isWinner) {
-        el.classList.add("text-color-black", "text-weight-semibold");
-        el.classList.remove("text-weight-normal");
-      } else {
-        el.classList.remove("text-color-black", "text-weight-semibold");
-        el.classList.add("text-weight-normal");
-      }
-    });
-  });
-
-  if (cashoutTable) cashoutTable.classList.toggle("text-color-black", lowestCost === cashRefiOptionCost);
-  if (helTable) helTable.classList.toggle("text-color-black", lowestCost === homeEquityLoanOptionCost);
-  if (heiTable) heiTable.classList.toggle("text-color-black", lowestCost === heiOptionCost);
 }
 
 function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
@@ -539,6 +533,42 @@ function calculateHEIValues(years) {
   const repayment = Math.min(capBasedRepayment, shareBasedRepayment);
 
   return { repayment };
+}
+
+function updateTableStyling(lowestCost, helCost, cashRefiCost, heiCost) {
+  const tables = [
+    { id: "#hel-table", cost: helCost, prefix: "hel-" },
+    { id: "#cashout-table", cost: cashRefiCost, prefix: "cash-out-refi-" },
+    { id: "#hei-table", cost: heiCost, prefix: "hei-" },
+  ];
+
+  tables.forEach(({ id, cost, prefix }) => {
+    const table = document.querySelector(id);
+    const elements = document.querySelectorAll(`[calc-result^="${prefix}"]`);
+    const isWinner = cost === lowestCost;
+
+    if (table) table.classList.toggle("text-color-black", isWinner);
+    elements.forEach((el) => {
+      if (isWinner) {
+        el.classList.add("text-color-black", "text-weight-semibold");
+        el.classList.remove("text-weight-normal");
+      } else {
+        el.classList.remove("text-color-black", "text-weight-semibold");
+        el.classList.add("text-weight-normal");
+      }
+    });
+  });
+}
+
+function removeHighlighting(tableId) {
+  const table = document.querySelector(tableId);
+  if (table) {
+    table.classList.remove("text-color-black");
+    table.querySelectorAll("[calc-result]").forEach((el) => {
+      el.classList.remove("text-color-black", "text-weight-semibold");
+      el.classList.add("text-weight-normal");
+    });
+  }
 }
 
 // Initialization
