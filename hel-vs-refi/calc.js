@@ -597,6 +597,9 @@ function setDefaultValues() {
   loanAmountInput.value = formatCurrency(50000);
   creditScoreInput.value = "good";
   creditScoreInput.dispatchEvent(new Event("change"));
+
+  // Trigger calculation after setting default values
+  calculateSavings();
 }
 
 // Initialize on DOM content loaded
