@@ -403,12 +403,11 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
   const totalExistingMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
   const totalHELPayments = homeEquityLoanPayment * selectedTerm * 12;
-  const totalHomeEquityLoanPayments = totalExistingMortgagePayments + totalHELPayments;
+  const totalHomeEquityLoanPayments = totalHELPayments;
 
   const totalInterestCostCashOutRefi = totalCashRefiPayments - totalCashRefiPrincipal;
-  const existingMortgageInterest = totalExistingMortgagePayments - currentMortgagePrincipal;
   const helInterest = totalHELPayments - loanAmount;
-  const totalInterestCostHEL = existingMortgageInterest + helInterest;
+  const totalInterestCostHEL = helInterest;
 
   if (isNaN(cashRefiPayment) || isNaN(homeEquityLoanPayment) || isNaN(totalCashRefiPrincipal) || isNaN(totalInterestCostCashOutRefi) || isNaN(totalInterestCostHEL) || isNaN(totalCashRefiPayments) || isNaN(totalHomeEquityLoanPayments)) {
     return;
