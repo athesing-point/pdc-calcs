@@ -216,7 +216,7 @@ function calculateRemainingBalance(principal, annualRate, totalTerm, elapsedTerm
 }
 
 function calculateHomeEquityLoanAPR(creditScoreText) {
-  const baseAPR = 0.0917;
+  const baseAPR = 0.0859;
   switch (creditScoreText.toLowerCase()) {
     case "excellent":
       return baseAPR - 0.0083;
