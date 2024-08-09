@@ -429,7 +429,7 @@ function updateTableStyling(lowestCost, helCost, cashRefiCost, heiCost) {
   tables.forEach(({ id, cost, prefix }) => {
     const table = document.querySelector(id);
     const elements = document.querySelectorAll(`[calc-result^="${prefix}"]`);
-    const isWinner = cost === lowestCost;
+    const isWinner = cost === lowestCost || id === "#hei-table"; // Always highlight HEI table
 
     if (table) table.classList.toggle("text-color-black", isWinner);
     elements.forEach((el) => {
