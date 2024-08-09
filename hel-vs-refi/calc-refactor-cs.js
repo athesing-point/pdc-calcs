@@ -342,7 +342,7 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
     { elements: helElements, cost: totalHELCost },
     { elements: heiElements, cost: totalHEICost },
   ].forEach(({ elements, cost }) => {
-    const isWinner = cost === lowestCost || elements === heiElements; // Always highlight HEI table
+    const isWinner = cost === lowestCost;
     elements.forEach((el) => {
       if (isWinner) {
         el.classList.add("text-color-black", "text-weight-semibold");
@@ -415,11 +415,6 @@ function calculateHEIValues(years) {
   const shareBasedRepayment = shareOfAppreciation + loanAmount;
   const capBasedRepayment = loanAmount * Math.pow(1 + 0.175 / 12, years * 12);
   const repayment = Math.min(capBasedRepayment, shareBasedRepayment);
-
-  // Ensure point share does not exceed 70%
-  if (pointPercentage > 0.7) {
-    return { repayment: loanAmount * 1.7 }; // Cap repayment at 170% of loan amount
-  }
 
   return { repayment };
 }
