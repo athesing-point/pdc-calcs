@@ -34,7 +34,7 @@ const debounce = (func, delay) => {
 };
 
 // Event handlers
-const debouncedCalculateSavings = debounce(calculateSavings, 500);
+const debouncedCalculateSavings = debounce(calculateSavings, 200);
 
 function handleNumericInput(event) {
   const input = event.target;
