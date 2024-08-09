@@ -5,6 +5,7 @@ const MIN_LOAN_AMOUNT = 1;
 const MAX_LOAN_AMOUNT = 500000;
 const MIN_HOME_VALUE = 80000;
 const MIN_MORTGAGE_BALANCE = 10000;
+const BASE_HEL_APR = 0.0859;
 
 // Global variables
 let isCreditScoreApproved = true;
@@ -21,28 +22,16 @@ const calcButton = document.querySelector('[calc-input="calc_button"]');
 const savingsAmountElement = document.querySelector('[calc-result="savings-amount"]');
 
 // Helper functions
-function formatCurrency(value) {
-  if (isNaN(value) || value === undefined) return "0";
-  return parseFloat(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
-function formatCurrencyWithSymbol(value) {
-  if (isNaN(value) || value === undefined) return "$0";
-  return "$" + formatCurrency(value);
-}
-
-function formatPercentage(value) {
-  if (isNaN(value) || value === undefined) return "0.00%";
-  return parseFloat(value).toFixed(2) + "%";
-}
-
-function debounce(func, delay) {
+const formatCurrency = (value) => (isNaN(value) ? "0" : parseFloat(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
+const formatCurrencyWithSymbol = (value) => (isNaN(value) ? "$0" : "$" + formatCurrency(value));
+const formatPercentage = (value) => (isNaN(value) ? "0.00%" : parseFloat(value).toFixed(2) + "%");
+const debounce = (func, delay) => {
   let timeout;
   return (...args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), delay);
   };
-}
+};
 
 // Event handlers
 const debouncedCalculateSavings = debounce(calculateSavings, 500);
@@ -61,9 +50,7 @@ function handleNumericInput(event) {
 }
 
 function preventNonNumericInput(event) {
-  if (!/[0-9.]/.test(event.key)) {
-    event.preventDefault();
-  }
+  if (!/[0-9.]/.test(event.key)) event.preventDefault();
 }
 
 function handleDollarInput(event) {
@@ -71,9 +58,7 @@ function handleDollarInput(event) {
   let value = input.value.replace(/[^0-9.-]+/g, "");
   if (value !== "") {
     value = parseFloat(value);
-    if (!isNaN(value)) {
-      input.value = formatCurrency(value);
-    }
+    if (!isNaN(value)) input.value = formatCurrency(value);
   }
   debouncedCalculateSavings();
 }
@@ -82,21 +67,11 @@ function handleDollarInputBlur(event) {
   const input = event.target;
   let value = parseFloat(input.value.replace(/[^0-9.-]+/g, ""));
   if (isNaN(value) || value === 0) {
-    if (input === homeValueInput) {
-      value = MIN_HOME_VALUE;
-    } else if (input === currentMortgagePrincipalInput) {
-      value = MIN_MORTGAGE_BALANCE;
-    } else {
-      value = MIN_LOAN_AMOUNT;
-    }
+    value = input === homeValueInput ? MIN_HOME_VALUE : input === currentMortgagePrincipalInput ? MIN_MORTGAGE_BALANCE : MIN_LOAN_AMOUNT;
   }
-  if (input === homeValueInput) {
-    value = Math.max(value, MIN_HOME_VALUE);
-  } else if (input === currentMortgagePrincipalInput) {
-    value = Math.max(value, MIN_MORTGAGE_BALANCE);
-  } else if (input === loanAmountInput) {
-    value = Math.min(value, MAX_LOAN_AMOUNT);
-  }
+  if (input === homeValueInput) value = Math.max(value, MIN_HOME_VALUE);
+  else if (input === currentMortgagePrincipalInput) value = Math.max(value, MIN_MORTGAGE_BALANCE);
+  else if (input === loanAmountInput) value = Math.min(value, MAX_LOAN_AMOUNT);
   input.value = formatCurrency(value);
   debouncedCalculateSavings();
 }
@@ -112,24 +87,15 @@ function handleMortgageRateInput(event) {
   let value = currentMortgageRateInput.value.replace(/[^0-9.]/g, "");
   let cursorPosition = event.target.selectionStart;
   let dotIndex = value.indexOf(".");
-
-  if (dotIndex !== -1 && value.length - dotIndex > 3) {
-    value = value.slice(0, dotIndex + 3);
-  }
-
+  if (dotIndex !== -1 && value.length - dotIndex > 3) value = value.slice(0, dotIndex + 3);
   let numValue = parseFloat(value);
   if (!isNaN(numValue)) {
     numValue = Math.min(Math.max(numValue, 1.5), 15);
     value = numValue.toFixed(2);
   }
-
   currentMortgageRateInput.value = value ? value + "%" : "";
-
-  if (value) {
-    cursorPosition += currentMortgageRateInput.value.length - value.length;
-  }
+  if (value) cursorPosition += currentMortgageRateInput.value.length - value.length;
   currentMortgageRateInput.setSelectionRange(cursorPosition, cursorPosition);
-
   debouncedCalculateSavings();
 }
 
@@ -143,7 +109,6 @@ function handleMortgageRateInputBlur() {
 function updateHomeEquityLoanAPR() {
   const selectedOption = creditScoreInput.options[creditScoreInput.selectedIndex];
   const creditScoreText = selectedOption ? selectedOption.value : creditScoreInput.value;
-
   isCreditScoreApproved = ["excellent", "very good", "good"].includes(creditScoreText.toLowerCase());
   debouncedCalculateSavings();
 }
@@ -187,17 +152,13 @@ function handleMortgageTermChange(increment) {
 function handleDollarAmountChange(input, increment) {
   let currentAmount = parseFloat(input.value.replace(/[^0-9.-]+/g, "")) || 0;
   currentAmount = Math.max(currentAmount + increment, 0);
-  if (input === loanAmountInput) {
-    currentAmount = Math.min(currentAmount, MAX_LOAN_AMOUNT);
-  }
+  if (input === loanAmountInput) currentAmount = Math.min(currentAmount, MAX_LOAN_AMOUNT);
   input.value = formatCurrency(currentAmount);
   debouncedCalculateSavings();
 }
 
 // Calculation functions
-function calculateLTV(loanAmount, homeValue) {
-  return loanAmount / homeValue;
-}
+const calculateLTV = (loanAmount, homeValue) => loanAmount / homeValue;
 
 function calculateMonthlyPayment(principal, annualRate, termYears) {
   const monthlyRate = annualRate / 12;
@@ -205,9 +166,7 @@ function calculateMonthlyPayment(principal, annualRate, termYears) {
   return (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
 }
 
-function calculateHomeEquityLoanPayment(principal, annualRate, termYears) {
-  return calculateMonthlyPayment(principal, annualRate, termYears);
-}
+const calculateHomeEquityLoanPayment = (principal, annualRate, termYears) => calculateMonthlyPayment(principal, annualRate, termYears);
 
 function calculateRemainingBalance(principal, annualRate, totalTerm, elapsedTerm) {
   const monthlyRate = annualRate / 12;
@@ -218,28 +177,23 @@ function calculateRemainingBalance(principal, annualRate, totalTerm, elapsedTerm
 }
 
 function calculateHomeEquityLoanAPR(creditScoreText) {
-  const baseAPR = 0.0859;
   switch (creditScoreText.toLowerCase()) {
     case "excellent":
-      return baseAPR - 0.0083;
+      return BASE_HEL_APR - 0.0083;
     case "very good":
-      return baseAPR - 0.0037;
+      return BASE_HEL_APR - 0.0037;
     case "good":
-      return baseAPR;
+      return BASE_HEL_APR;
     case "average":
-      return baseAPR + 0.0083;
+      return BASE_HEL_APR + 0.0083;
     case "low":
-      return baseAPR + 0.0164;
+      return BASE_HEL_APR + 0.0164;
     default:
-      return baseAPR + 0.0164;
+      return BASE_HEL_APR + 0.0164;
   }
 }
 
-function calculateCashOutRefiRate(creditScoreText) {
-  const helRate = calculateHomeEquityLoanAPR(creditScoreText);
-  const cashOutRefiAdjustment = -0.005;
-  return Math.max(helRate + cashOutRefiAdjustment, 0.03);
-}
+const calculateCashOutRefiRate = (creditScoreText) => Math.max(calculateHomeEquityLoanAPR(creditScoreText) - 0.005, 0.03);
 
 // Main calculation function
 function calculateSavings() {
@@ -250,11 +204,8 @@ function calculateSavings() {
   let loanAmount = parseFloat(loanAmountInput.value.replace(/[^0-9.-]+/g, "")) || 0;
   let selectedTerm = parseInt(document.querySelector('[name="term-length"]:checked')?.value || "15");
 
-  if (isNaN(homeValue) || isNaN(currentMortgagePrincipal) || isNaN(remainingMortgageTerm) || isNaN(currentMortgageRate) || isNaN(loanAmount) || isNaN(selectedTerm)) {
-    return;
-  }
+  if (isNaN(homeValue) || isNaN(currentMortgagePrincipal) || isNaN(remainingMortgageTerm) || isNaN(currentMortgageRate) || isNaN(loanAmount) || isNaN(selectedTerm)) return;
 
-  // Update input values only if they're at the minimum value
   if (homeValue === MIN_HOME_VALUE) homeValueInput.value = formatCurrency(homeValue);
   if (currentMortgagePrincipal === MIN_MORTGAGE_BALANCE) currentMortgagePrincipalInput.value = formatCurrency(currentMortgagePrincipal);
   if (loanAmount === MIN_LOAN_AMOUNT) loanAmountInput.value = formatCurrency(loanAmount);
@@ -273,22 +224,16 @@ function calculateSavings() {
     loanAmountInput.value = formatCurrency(loanAmount);
   }
 
-  // Cap the loan amount at MAX_LOAN_AMOUNT
   loanAmount = Math.min(loanAmount, MAX_LOAN_AMOUNT);
   loanAmountInput.value = formatCurrency(loanAmount);
 
-  // Calculate the current mortgage payment
   const currentMortgagePayment = calculateMonthlyPayment(currentMortgagePrincipal, currentMortgageRate, remainingMortgageTerm);
-
-  // Calculate the effective cash-out refinance rate
   const homeEquityLoanAPR = calculateHomeEquityLoanAPR(creditScoreInput.value);
   const cashOutRefiRate = calculateCashOutRefiRate(creditScoreInput.value);
-
   const homeEquityLoanPayment = calculateHomeEquityLoanPayment(loanAmount, homeEquityLoanAPR, selectedTerm);
 
   const totalCurrentMortgagePayments = currentMortgagePayment * remainingMortgageTerm * 12;
   const totalHomeEquityLoanPayments = homeEquityLoanPayment * selectedTerm * 12;
-
   const homeEquityLoanOptionCost = totalCurrentMortgagePayments + totalHomeEquityLoanPayments;
   const totalInterestCostHEL = homeEquityLoanOptionCost - (currentMortgagePrincipal + loanAmount);
 
@@ -296,44 +241,30 @@ function calculateSavings() {
   const totalCashRefiPayments = cashRefiPayment * selectedTerm * 12;
   const cashRefiOptionCost = totalCashRefiPayments;
 
-  // Calculate HEI option cost
   const heiRepayment = calculateHEIValues(selectedTerm);
   const heiOptionCost = heiRepayment;
   const heiFinanceCost = heiOptionCost - loanAmount;
 
-  // Always update HEI table values
   document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
   document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
   document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
 
   if (isApproved) {
-    // Perform calculations and update table values for all options
     calculateTableValues(cashOutRefiRate, homeEquityLoanAPR);
-
-    // Find the lowest cost option
     const lowestCost = Math.min(homeEquityLoanOptionCost, cashRefiOptionCost, heiOptionCost);
-
-    // Update table styling
     updateTableStyling(lowestCost, homeEquityLoanOptionCost, cashRefiOptionCost, heiOptionCost);
   } else {
-    // Set only HEL and Cash Out Refi column values to zero
     document.querySelectorAll('[calc-result^="hel-"], [calc-result^="cash-out-refi-"]').forEach((el) => {
       el.innerText = el.getAttribute("calc-result").includes("rate") ? "0%" : "$0";
     });
-
-    // Remove highlighting from HEL and Cash Out Refi columns
     removeHighlighting("#cashout-table");
     removeHighlighting("#hel-table");
-
-    // Only consider HEI for highlighting when not approved
     updateTableStyling(heiOptionCost, Infinity, Infinity, heiOptionCost);
   }
 
-  // Find the lowest cost option
   const lowestCost = Math.min(homeEquityLoanOptionCost, cashRefiOptionCost, heiOptionCost);
   let savings, betterOptionText;
 
-  // Compare only HELoan and Cash-out refi for the better option text
   if (homeEquityLoanOptionCost <= cashRefiOptionCost) {
     savings = cashRefiOptionCost - homeEquityLoanOptionCost;
     betterOptionText = "With a home equity loan you would save:";
@@ -343,8 +274,6 @@ function calculateSavings() {
   }
 
   savingsAmountElement.innerText = formatCurrencyWithSymbol(Math.abs(savings));
-
-  // Update the better option text
   const betterOptionTextElement = document.querySelector('[calc-result="better-option"]');
   if (betterOptionTextElement) betterOptionTextElement.textContent = betterOptionText;
 }
@@ -373,11 +302,8 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   const helInterest = totalHELPayments - loanAmount;
   const totalInterestCostHEL = helInterest;
 
-  if (isNaN(cashRefiPayment) || isNaN(homeEquityLoanPayment) || isNaN(totalCashRefiPrincipal) || isNaN(totalInterestCostCashOutRefi) || isNaN(totalInterestCostHEL) || isNaN(totalCashRefiPayments) || isNaN(totalHomeEquityLoanPayments)) {
-    return;
-  }
+  if (isNaN(cashRefiPayment) || isNaN(homeEquityLoanPayment) || isNaN(totalCashRefiPrincipal) || isNaN(totalInterestCostCashOutRefi) || isNaN(totalInterestCostHEL) || isNaN(totalCashRefiPayments) || isNaN(totalHomeEquityLoanPayments)) return;
 
-  // Update the table
   document.querySelector('[calc-result="hel-effective-rate"]').innerText = formatPercentage(homeEquityLoanAPR * 100);
   document.querySelector('[calc-result="cash-out-refi-effective-rate"]').innerText = formatPercentage(cashOutRefiRate * 100);
 
@@ -393,22 +319,18 @@ function calculateTableValues(cashOutRefiRate, homeEquityLoanAPR) {
   document.querySelector('[calc-result="cash-out-refi-total-cost"]').innerText = formatCurrencyWithSymbol(totalCashRefiPayments);
   document.querySelector('[calc-result="hel-total-cost"]').innerText = formatCurrencyWithSymbol(totalHomeEquityLoanPayments);
 
-  // Calculate HEI values
   const heiValues = calculateHEIValues(selectedTerm);
   const heiOptionCost = heiValues.repayment;
   const heiFinanceCost = heiOptionCost - loanAmount;
 
-  // Update HEI values in the table
   document.querySelector('[calc-result="hei-total-principal"]').innerText = formatCurrencyWithSymbol(loanAmount);
   document.querySelector('[calc-result="hei-total-interest-cost"]').innerText = formatCurrencyWithSymbol(heiFinanceCost);
   document.querySelector('[calc-result="hei-total-cost"]').innerText = formatCurrencyWithSymbol(heiOptionCost);
 
-  // Calculate total costs for each option
   const totalCashRefiCost = totalCashRefiPayments;
   const totalHELCost = totalHomeEquityLoanPayments;
   const totalHEICost = heiOptionCost;
 
-  // Find the lowest cost option and update table styling
   const lowestCost = Math.min(totalCashRefiCost, totalHELCost, totalHEICost);
 
   const cashoutElements = document.querySelectorAll('[calc-result^="cash-out-refi-"]');
@@ -463,7 +385,6 @@ function calculateHEIValues(years) {
   const appreciationStartingAmount = Math.round((homeValue * 0.73) / 1000) * 1000;
   const homeValueForYear = homeValue * Math.pow(1 + appreciation, years);
 
-  // Determine the simple appreciation multiple based on credit score
   const creditScoreText = creditScoreInput.value.toLowerCase();
   let simpleAppreciationMultiple;
   switch (creditScoreText) {
@@ -486,7 +407,7 @@ function calculateHEIValues(years) {
       simpleAppreciationMultiple = 2.2;
       break;
     default:
-      simpleAppreciationMultiple = 2.2; // Default value if no match
+      simpleAppreciationMultiple = 2.2;
   }
 
   const pointPercentage = simpleAppreciationMultiple * (loanAmount / homeValue);
@@ -599,9 +520,7 @@ function setDefaultValues() {
   creditScoreInput.value = "good";
   creditScoreInput.dispatchEvent(new Event("change"));
 
-  // Trigger calculation after setting default values
   calculateSavings();
 }
 
-// Initialize on DOM content loaded
 document.addEventListener("DOMContentLoaded", initializeElements);
