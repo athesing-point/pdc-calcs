@@ -1,5 +1,5 @@
 // Constants
-const PERSONAL_LOAN_ORIGINATION_FEE = 0.04; // 4% origination fee for personal loans
+const PERSONAL_LOAN_ORIGINATION_FEE = 0.05; // 5% origination fee for personal loans
 const DEFAULT_INTEREST_RATE = 9.75; // 9.75% starting interest rate
 const DEFAULT_LOAN_AMOUNT = 50000; // $50,000 default loan amount
 const DEFAULT_LOAN_TERM = 60; // 60 months (5 years) default loan term
@@ -15,6 +15,7 @@ const calculateButton = document.querySelector('[calc-input="calc_button"]');
 const resultMonthly = document.getElementById("result-monthly");
 const resultInterest = document.getElementById("result-interest");
 const resultTotal = document.getElementById("result-total");
+const originFeeInput = document.getElementById("origin-fee");
 
 // Initialize inputs
 drawAmountInput.value = DEFAULT_LOAN_AMOUNT;
@@ -49,6 +50,9 @@ function calculateLoan() {
     loanTermMonths = parseInt(loanTermHelocSelect.value);
   }
 
+  // Update origination fee input
+  originFeeInput.value = (originationFee * 100).toFixed(0) + "%";
+
   const monthlyInterestRate = interestRate / 12;
   const totalPayments = loanTermMonths;
 
@@ -80,13 +84,11 @@ function toggleLoanTermSelects() {
     loanTermHelocSelect.classList.remove("hide");
     loanTermHelocSelect.value = DEFAULT_HELOC_TERM.toString();
   }
+  calculateLoan(); // Recalculate to update origination fee
 }
 
 // Event listeners
-loanTypeSelect.addEventListener("change", function () {
-  toggleLoanTermSelects();
-  calculateLoan();
-});
+loanTypeSelect.addEventListener("change", toggleLoanTermSelects);
 
 calculateButton.addEventListener("click", function (e) {
   e.preventDefault();
@@ -95,7 +97,6 @@ calculateButton.addEventListener("click", function (e) {
 
 // Initialize calculation on page load
 toggleLoanTermSelects();
-calculateLoan();
 
 // Add event listeners for real-time updates
 [drawAmountInput, interestRateInput, loanTermPersonalSelect, loanTermHelocSelect].forEach((element) => {
