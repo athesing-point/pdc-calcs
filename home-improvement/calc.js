@@ -16,6 +16,7 @@ const resultMonthly = document.getElementById("result-monthly");
 const resultInterest = document.getElementById("result-interest");
 const resultTotal = document.getElementById("result-total");
 const originFeeInput = document.getElementById("origin-fee");
+const helocTooltip = document.getElementById("heloc-tooltip");
 
 // Initialize inputs
 drawAmountInput.value = DEFAULT_LOAN_AMOUNT;
@@ -76,13 +77,17 @@ function calculateLoan() {
 function toggleLoanTermSelects() {
   const loanType = loanTypeSelect.value;
   if (loanType === "1") {
+    // Personal loan
     loanTermPersonalSelect.classList.remove("hide");
     loanTermHelocSelect.classList.add("hide");
     loanTermPersonalSelect.value = DEFAULT_LOAN_TERM.toString();
+    helocTooltip.classList.add("hide"); // Hide HELOC tooltip
   } else if (loanType === "2") {
+    // HELOC
     loanTermPersonalSelect.classList.add("hide");
     loanTermHelocSelect.classList.remove("hide");
     loanTermHelocSelect.value = DEFAULT_HELOC_TERM.toString();
+    helocTooltip.classList.remove("hide"); // Show HELOC tooltip
   }
   calculateLoan(); // Recalculate to update origination fee
 }
