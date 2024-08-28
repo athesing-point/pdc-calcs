@@ -1,0 +1,7 @@
+.env
+.DS_Store
+.cursorignore
+.cursorignore/
+.gitignore
+.gitattributes
+.prettierignore

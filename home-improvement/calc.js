@@ -34,11 +34,17 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
+// Helper function to parse formatted number strings
+function parseFormattedNumber(value) {
+  return parseFloat(value.replace(/[^0-9.-]+/g, ""));
+}
+
 // Calculate loan details
 function calculateLoan() {
   const loanType = loanTypeSelect.value;
-  const drawAmount = parseFloat(drawAmountInput.value);
-  const interestRate = parseFloat(interestRateInput.value) / 100;
+  const drawAmount = parseFormattedNumber(drawAmountInput.value);
+  // const interestRate = parseFloat(interestRateInput.value) / 100;
+  const interestRate = parseFormattedNumber(interestRateInput.value.replace("%", "")) / 100;
   let loanTermMonths;
   let originationFee = 0;
 
@@ -89,11 +95,18 @@ function toggleLoanTermSelects() {
     loanTermHelocSelect.value = DEFAULT_HELOC_TERM.toString();
     helocTooltip.classList.remove("hide"); // Show HELOC tooltip
   }
-  calculateLoan(); // Recalculate to update origination fee
+  calculateLoan(); // Recalculate when switching loan types
 }
+
+// Add a specific event listener for the HELOC loan term select
+loanTermHelocSelect.addEventListener("change", function () {
+  calculateLoan();
+});
 
 // Event listeners
 loanTypeSelect.addEventListener("change", toggleLoanTermSelects);
+loanTermPersonalSelect.addEventListener("change", calculateLoan);
+loanTermHelocSelect.addEventListener("change", calculateLoan);
 
 calculateButton.addEventListener("click", function (e) {
   e.preventDefault();
@@ -103,23 +116,125 @@ calculateButton.addEventListener("click", function (e) {
 // Initialize calculation on page load
 toggleLoanTermSelects();
 
+//Formatting/Helper functions
+
 // Add event listeners for real-time updates
-[drawAmountInput, interestRateInput, loanTermPersonalSelect, loanTermHelocSelect].forEach((element) => {
-  element.addEventListener("input", calculateLoan);
+document.querySelectorAll('input[input-format="dollar"], input[input-format="percent"], input[input-format="year"]').forEach((input) => {
+  if (input) {
+    input.addEventListener("input", () => {
+      formatInputField(input);
+      calculateLoan();
+    });
+
+    input.addEventListener("keypress", (event) => {
+      if (!/[0-9.]/.test(event.key)) {
+        event.preventDefault();
+      }
+    });
+  }
 });
 
-// Implement increment/decrement functionality for interest rate
-const btnDecrease = document.getElementById("btn-decrease");
-const btnIncrease = document.getElementById("btn-increase");
+// Function to format input fields
+function formatInputField(input) {
+  if (input) {
+    let value = parseFormattedNumber(input.value);
+    if (input.getAttribute("input-format") === "dollar") {
+      input.value = isNaN(value) ? "" : value.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    } else if (input.getAttribute("input-format") === "percent") {
+      input.value = isNaN(value) ? "" : `${value.toFixed(2)}%`;
+    } else if (input.getAttribute("input-format") === "year") {
+      input.value = isNaN(value) ? "" : `${value} yrs`;
+    }
+  }
+}
 
-btnDecrease.addEventListener("click", () => {
-  let currentRate = parseFloat(interestRateInput.value);
-  interestRateInput.value = Math.max(0, currentRate - 0.25).toFixed(2);
+// Format inputs on page load
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("input[input-format]").forEach(formatInputField);
   calculateLoan();
 });
 
-btnIncrease.addEventListener("click", () => {
-  let currentRate = parseFloat(interestRateInput.value);
-  interestRateInput.value = (currentRate + 0.25).toFixed(2);
+// Update the existing event listener for the interest rate input
+interestRateInput.addEventListener("input", () => {
+  let numericValue = interestRateInput.value.replace(/[^0-9.]/g, "");
+
+  // Enforce maximum 2 decimal places
+  let parts = numericValue.split(".");
+  if (parts.length > 1) {
+    parts[1] = parts[1].slice(0, 2);
+    numericValue = parts.join(".");
+  }
+
+  // Ensure minimum of 1.00%
+  let rate = Math.max(1, parseFloat(numericValue) || 1);
+
+  // Format the value with percentage
+  interestRateInput.value = `${rate.toFixed(2)}%`;
+
   calculateLoan();
 });
+
+// Update the function to handle arrow key presses for the interest rate
+function handleInterestRateKeydown(event) {
+  if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+    event.preventDefault();
+    let currentRate = parseFloat(interestRateInput.value.replace("%", ""));
+    let step = event.shiftKey ? 1 : 0.25;
+
+    if (event.key === "ArrowUp") {
+      currentRate += step;
+    } else {
+      currentRate = Math.max(1, currentRate - step); // Ensure minimum of 1.00%
+    }
+
+    currentRate = Math.min(100, currentRate); // Ensure maximum of 100%
+    interestRateInput.value = `${currentRate.toFixed(2)}%`;
+    calculateLoan();
+  }
+}
+
+// The event listener remains the same
+interestRateInput.addEventListener("keydown", handleInterestRateKeydown);
+
+// Remove or comment out the existing increment/decrement buttons functionality
+// btnDecrease.addEventListener("click", () => { ... });
+// btnIncrease.addEventListener("click", () => { ... });
+
+// Update the existing event listener for the draw amount input
+drawAmountInput.addEventListener("input", () => {
+  let numericValue = drawAmountInput.value.replace(/[^0-9]/g, "");
+
+  // Enforce minimum 4 digits and maximum 6 digits
+  if (numericValue.length < 4) {
+    numericValue = numericValue.padStart(4, "0");
+  } else if (numericValue.length > 6) {
+    numericValue = numericValue.slice(0, 6);
+  }
+
+  // Format the value with commas
+  drawAmountInput.value = parseInt(numericValue).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  calculateLoan();
+});
+
+// Update the handleDrawAmountKeydown function
+function handleDrawAmountKeydown(event) {
+  if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+    event.preventDefault();
+    let currentAmount = parseFormattedNumber(drawAmountInput.value);
+    let step = event.shiftKey ? 1000 : 100;
+
+    if (event.key === "ArrowUp") {
+      currentAmount += step;
+    } else {
+      currentAmount = Math.max(1000, currentAmount - step); // Ensure minimum of 1000
+    }
+
+    currentAmount = Math.min(999999, currentAmount); // Ensure maximum of 999999
+    drawAmountInput.value = currentAmount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    calculateLoan();
+  }
+}
+
+// Add this event listener after the existing event listeners
+drawAmountInput.addEventListener("keydown", handleDrawAmountKeydown);
