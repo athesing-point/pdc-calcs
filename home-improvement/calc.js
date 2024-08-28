@@ -198,23 +198,35 @@ interestRateInput.addEventListener("keydown", handleInterestRateKeydown);
 
 // Add these lines after the handleInterestRateKeydown function
 function adjustInterestRate(increment) {
+  console.log("adjustInterestRate called with increment:", increment);
   let currentRate = parseFloat(interestRateInput.value.replace("%", ""));
   let step = 0.25;
 
   if (increment) {
     currentRate += step;
   } else {
-    currentRate = Math.max(1, currentRate - step); // Ensure minimum of 1.00%
+    currentRate = Math.max(1, currentRate - step);
   }
 
-  currentRate = Math.min(100, currentRate); // Ensure maximum of 100%
+  currentRate = Math.min(100, currentRate);
+  console.log("New rate:", currentRate);
+
+  // Update the input value
   interestRateInput.value = `${currentRate.toFixed(2)}%`;
-  calculateLoan();
+
+  // Trigger the input event to ensure all related functions are called
+  interestRateInput.dispatchEvent(new Event("input"));
 }
 
 // Add these lines to handle the button clicks
-document.querySelector('[data-input="decrease"]').addEventListener("click", () => adjustInterestRate(false));
-document.querySelector('[data-input="increase"]').addEventListener("click", () => adjustInterestRate(true));
+document.querySelector('[data-input="decrease"]').addEventListener("click", () => {
+  console.log("Decrease button clicked");
+  adjustInterestRate(false);
+});
+document.querySelector('[data-input="increase"]').addEventListener("click", () => {
+  console.log("Increase button clicked");
+  adjustInterestRate(true);
+});
 
 // Update the existing event listener for the draw amount input
 drawAmountInput.addEventListener("input", () => {
