@@ -196,9 +196,25 @@ function handleInterestRateKeydown(event) {
 // The event listener remains the same
 interestRateInput.addEventListener("keydown", handleInterestRateKeydown);
 
-// Remove or comment out the existing increment/decrement buttons functionality
-// btnDecrease.addEventListener("click", () => { ... });
-// btnIncrease.addEventListener("click", () => { ... });
+// Add these lines after the handleInterestRateKeydown function
+function adjustInterestRate(increment) {
+  let currentRate = parseFloat(interestRateInput.value.replace("%", ""));
+  let step = 0.25;
+
+  if (increment) {
+    currentRate += step;
+  } else {
+    currentRate = Math.max(1, currentRate - step); // Ensure minimum of 1.00%
+  }
+
+  currentRate = Math.min(100, currentRate); // Ensure maximum of 100%
+  interestRateInput.value = `${currentRate.toFixed(2)}%`;
+  calculateLoan();
+}
+
+// Add these lines to handle the button clicks
+document.querySelector('[data-input="decrease"]').addEventListener("click", () => adjustInterestRate(false));
+document.querySelector('[data-input="increase"]').addEventListener("click", () => adjustInterestRate(true));
 
 // Update the existing event listener for the draw amount input
 drawAmountInput.addEventListener("input", () => {
