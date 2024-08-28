@@ -198,7 +198,6 @@ interestRateInput.addEventListener("keydown", handleInterestRateKeydown);
 
 // Add these lines after the handleInterestRateKeydown function
 function adjustInterestRate(increment) {
-  console.log("adjustInterestRate called with increment:", increment);
   let currentRate = parseFloat(interestRateInput.value.replace("%", ""));
   let step = 0.25;
 
@@ -209,7 +208,6 @@ function adjustInterestRate(increment) {
   }
 
   currentRate = Math.min(100, currentRate);
-  console.log("New rate:", currentRate);
 
   // Update the input value
   interestRateInput.value = `${currentRate.toFixed(2)}%`;
@@ -218,13 +216,14 @@ function adjustInterestRate(increment) {
   interestRateInput.dispatchEvent(new Event("input"));
 }
 
-// Add these lines to handle the button clicks
-document.querySelector('[data-input="decrease"]').addEventListener("click", () => {
-  console.log("Decrease button clicked");
+// Update the button click event listeners
+document.querySelector('[data-input="decrease"]').addEventListener("click", (e) => {
+  e.preventDefault(); // Prevent default button behavior
   adjustInterestRate(false);
 });
-document.querySelector('[data-input="increase"]').addEventListener("click", () => {
-  console.log("Increase button clicked");
+
+document.querySelector('[data-input="increase"]').addEventListener("click", (e) => {
+  e.preventDefault(); // Prevent default button behavior
   adjustInterestRate(true);
 });
 
