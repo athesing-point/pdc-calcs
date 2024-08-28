@@ -216,16 +216,28 @@ function adjustInterestRate(increment) {
   interestRateInput.dispatchEvent(new Event("input"));
 }
 
-// Update the button click event listeners
-document.querySelector('[data-input="decrease"]').addEventListener("click", (e) => {
-  e.preventDefault(); // Prevent default button behavior
-  adjustInterestRate(false);
-});
+// Wrap the button event listeners in a function
+function setupButtonListeners() {
+  const decreaseButton = document.querySelector('[data-input="decrease"]');
+  const increaseButton = document.querySelector('[data-input="increase"]');
 
-document.querySelector('[data-input="increase"]').addEventListener("click", (e) => {
-  e.preventDefault(); // Prevent default button behavior
-  adjustInterestRate(true);
-});
+  if (decreaseButton) {
+    decreaseButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      adjustInterestRate(false);
+    });
+  }
+
+  if (increaseButton) {
+    increaseButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      adjustInterestRate(true);
+    });
+  }
+}
+
+// Call this function when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", setupButtonListeners);
 
 // Update the existing event listener for the draw amount input
 drawAmountInput.addEventListener("input", () => {
