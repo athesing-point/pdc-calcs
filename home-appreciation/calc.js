@@ -1,3 +1,5 @@
+import createAlertHandler from "https://cdn.jsdelivr.net/gh/athesing-point/pdc-calcs@173a5d44/shared/alert.min.js";
+
 const initializeHomeAppreciationCalculator = () => {
   // Input elements
   const homeValueInput = document.querySelector('[calc-input="home_value"]');
@@ -8,19 +10,9 @@ const initializeHomeAppreciationCalculator = () => {
   // Result elements
   const futureValueResult = document.querySelector('[calc-result="hv-appreciated"]');
   const appreciationResult = document.querySelector('[calc-result="value-increase"]');
-  const alertElement = document.querySelector(".calc-alert");
 
-  // Alert handling
-  let isInitialCalculation = true;
-  const showAlert = (message = "Results updated") => {
-    if (alertElement && !isInitialCalculation) {
-      alertElement.textContent = message;
-      alertElement.classList.remove("hide");
-      setTimeout(() => {
-        alertElement.classList.add("hide");
-      }, 1500);
-    }
-  };
+  // Initialize alert handler
+  const { showAlert, setInitialCalculationComplete } = createAlertHandler();
 
   // Validation for select inputs
   const validateSelect = (select, fieldName) => {
@@ -82,7 +74,7 @@ const initializeHomeAppreciationCalculator = () => {
       const newFutureValue = formatResultCurrency(futureValue);
       futureValueResult.textContent = newFutureValue;
       if (forceAlert || prevFutureValue !== newFutureValue) {
-        showAlert("Results updated");
+        showAlert();
       }
     }
     if (appreciationResult) {
@@ -155,7 +147,7 @@ const initializeHomeAppreciationCalculator = () => {
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
-        calculateAppreciation();
+        calculateAppreciation(true);
       }
     });
   });
@@ -173,7 +165,7 @@ const initializeHomeAppreciationCalculator = () => {
 
   // Calculate initial values and set initial calculation flag
   calculateAppreciation();
-  isInitialCalculation = false;
+  setInitialCalculationComplete();
 };
 
 // Auto-initialize if script is loaded after DOM content is loaded

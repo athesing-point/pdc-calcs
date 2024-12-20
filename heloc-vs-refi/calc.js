@@ -1,4 +1,4 @@
-import createAlertHandler from "../shared/alert.js";
+import createAlertHandler from "https://cdn.jsdelivr.net/gh/athesing-point/pdc-calcs@173a5d44/shared/alert.min.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Alert handler

@@ -1,9 +1,14 @@
+import createAlertHandler from "https://cdn.jsdelivr.net/gh/athesing-point/pdc-calcs@173a5d44/shared/alert.min.js";
+
 // Constants
 const PERSONAL_LOAN_ORIGINATION_FEE = 0.05; // 5% origination fee for personal loans
 const DEFAULT_INTEREST_RATE = 12.4; // 12.4% starting interest rate from bankrate.com as of 9/26/2024
 const DEFAULT_LOAN_AMOUNT = 50000; // $50,000 default loan amount
 const DEFAULT_LOAN_TERM = 60; // 60 months (5 years) default loan term
 const DEFAULT_HELOC_TERM = 240; // 240 months (20 years) default HELOC repayment term
+
+// Initialize alert handler
+const { showAlert, setInitialCalculationComplete } = createAlertHandler();
 
 // DOM Elements
 const loanTypeSelect = document.getElementById("loan-type");
@@ -43,7 +48,6 @@ function parseFormattedNumber(value) {
 function calculateLoan() {
   const loanType = loanTypeSelect.value;
   const drawAmount = parseFormattedNumber(drawAmountInput.value);
-  // const interestRate = parseFloat(interestRateInput.value) / 100;
   const interestRate = parseFormattedNumber(interestRateInput.value.replace("%", "")) / 100;
   let loanTermMonths;
   let originationFee = 0;
@@ -73,10 +77,24 @@ function calculateLoan() {
   // Calculate total cost
   const totalCost = loanAmountWithFee + totalInterest;
 
+  // Store previous values
+  const prevMonthly = resultMonthly.textContent;
+  const prevInterest = resultInterest.textContent;
+  const prevTotal = resultTotal.textContent;
+
   // Update results with rounding to whole dollars
-  resultMonthly.textContent = formatCurrency(Math.round(monthlyPayment));
-  resultInterest.textContent = formatCurrency(Math.round(totalInterest));
-  resultTotal.textContent = formatCurrency(Math.round(totalCost));
+  const newMonthly = formatCurrency(Math.round(monthlyPayment));
+  const newInterest = formatCurrency(Math.round(totalInterest));
+  const newTotal = formatCurrency(Math.round(totalCost));
+
+  resultMonthly.textContent = newMonthly;
+  resultInterest.textContent = newInterest;
+  resultTotal.textContent = newTotal;
+
+  // Show alert if values changed
+  if (prevMonthly !== newMonthly || prevInterest !== newInterest || prevTotal !== newTotal) {
+    showAlert();
+  }
 }
 
 // Function to toggle loan term selects based on loan type
@@ -114,7 +132,11 @@ calculateButton.addEventListener("click", function (e) {
 });
 
 // Initialize calculation on page load
-toggleLoanTermSelects();
+document.addEventListener("DOMContentLoaded", () => {
+  toggleLoanTermSelects();
+  calculateLoan();
+  setInitialCalculationComplete();
+});
 
 //Formatting/Helper functions
 
