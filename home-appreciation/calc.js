@@ -22,6 +22,16 @@ const initializeHomeAppreciationCalculator = () => {
     }
   };
 
+  // Validation for select inputs
+  const validateSelect = (select, fieldName) => {
+    const firstOption = select.querySelector("option:first-child");
+    if (firstOption && select.value === firstOption.value) {
+      showAlert(`Please select a ${fieldName}`);
+      return false;
+    }
+    return true;
+  };
+
   // Debounce function
   const debounce = (func, wait) => {
     let timeout;
@@ -51,6 +61,11 @@ const initializeHomeAppreciationCalculator = () => {
     const homeValue = parseFormattedNumber(homeValueInput?.value || "0");
     const years = parseInt(yearsSelect?.value || "0");
     const growthRate = parseFloat(growthRateSelect?.value || "0");
+
+    // Validate selects before calculation
+    if (!validateSelect(yearsSelect, "number of years") || !validateSelect(growthRateSelect, "growth rate")) {
+      return;
+    }
 
     if (isNaN(homeValue) || isNaN(years) || isNaN(growthRate)) return;
 
@@ -93,7 +108,11 @@ const initializeHomeAppreciationCalculator = () => {
   }
 
   if (yearsSelect) {
-    yearsSelect.addEventListener("change", debouncedCalculation);
+    yearsSelect.addEventListener("change", () => {
+      if (validateSelect(yearsSelect, "number of years")) {
+        debouncedCalculation();
+      }
+    });
     // Remove the disabled option to allow selection
     const disabledOption = yearsSelect.querySelector("option[disabled]");
     if (disabledOption) {
@@ -102,7 +121,11 @@ const initializeHomeAppreciationCalculator = () => {
   }
 
   if (growthRateSelect) {
-    growthRateSelect.addEventListener("change", debouncedCalculation);
+    growthRateSelect.addEventListener("change", () => {
+      if (validateSelect(growthRateSelect, "growth rate")) {
+        debouncedCalculation();
+      }
+    });
     // Remove the disabled option to allow selection
     const disabledOption = growthRateSelect.querySelector("option[disabled]");
     if (disabledOption) {
