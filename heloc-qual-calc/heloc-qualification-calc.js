@@ -1,3 +1,5 @@
+import createAlertHandler from "../shared/alert.js";
+
 // Utility functions
 function formatCurrency(value) {
   return `$${(value / 1000).toFixed(0)}k`;
@@ -143,55 +145,107 @@ function calculateHELOCQualification() {
   };
 }
 
-// Set up event listener for the calculate button
-window.addEventListener("load", () => {
+// Set up event listeners when the DOM is loaded
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize alert handler
+  const { showAlert, setInitialCalculationComplete } = createAlertHandler();
+
   const calcButton = document.querySelector('[calc-input="calc_button"]');
   if (calcButton) {
-    console.log("Calc button found, adding event listener."); // Debugging log
     calcButton.addEventListener("click", (event) => {
-      event.preventDefault(); // Prevent the default link behavior
-      console.log("Calc button clicked."); // Debugging log
+      event.preventDefault();
       const results = calculateHELOCQualification();
-      console.log(results); // Debugging log
 
       // Display each result in the corresponding HTML element
+      let resultsUpdated = false;
       document.querySelectorAll("[calc-result]").forEach((element) => {
         const resultType = element.getAttribute("calc-result");
-        console.log(resultType, results[resultType]); // Debugging log
         if (results[resultType]) {
-          element.innerText = results[resultType];
+          const newValue = results[resultType];
+          if (element.innerText !== newValue) {
+            element.innerText = newValue;
+            resultsUpdated = true;
+          }
         }
       });
+
+      // Show alert if results changed
+      if (resultsUpdated) {
+        showAlert();
+      }
     });
-  } else {
-    console.log("Calc button not found."); // Debugging log
   }
-});
 
-// Format input fields with commas
-document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
-  input.addEventListener("input", () => {
-    // Remove any existing commas and non-numeric characters except for numbers
-    let numericValue = input.value.replace(/[^0-9]/g, "");
-    // Insert commas for thousands, millions, etc.
-    let formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    // Update the input field with the formatted value
-    input.value = formattedValue;
+  // Format input fields with commas
+  document.querySelectorAll(".calc-input[type='text']").forEach((input) => {
+    input.addEventListener("input", () => {
+      let numericValue = input.value.replace(/[^0-9]/g, "");
+      let formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      input.value = formattedValue;
+    });
   });
-});
 
-// Add event listener to trigger calculation on Enter key press
-document.querySelectorAll(".calc-input").forEach((input) => {
-  input.addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-      event.preventDefault(); // Prevent the default action to avoid submitting the form
-      const results = calculateHELOCQualification();
-      document.querySelectorAll("[calc-result]").forEach((element) => {
-        const resultType = element.getAttribute("calc-result");
-        if (results[resultType]) {
-          element.innerText = results[resultType];
+  // Add event listener for Enter key
+  document.querySelectorAll(".calc-input").forEach((input) => {
+    input.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        const results = calculateHELOCQualification();
+        let resultsUpdated = false;
+        document.querySelectorAll("[calc-result]").forEach((element) => {
+          const resultType = element.getAttribute("calc-result");
+          if (results[resultType]) {
+            const newValue = results[resultType];
+            if (element.innerText !== newValue) {
+              element.innerText = newValue;
+              resultsUpdated = true;
+            }
+          }
+        });
+
+        // Show alert if results changed
+        if (resultsUpdated) {
+          showAlert();
         }
-      });
-    }
+      }
+    });
   });
+
+  // Add event listener for input changes with debounce
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  document.querySelectorAll(".calc-input").forEach((input) => {
+    input.addEventListener(
+      "input",
+      debounce(() => {
+        const results = calculateHELOCQualification();
+        let resultsUpdated = false;
+        document.querySelectorAll("[calc-result]").forEach((element) => {
+          const resultType = element.getAttribute("calc-result");
+          if (results[resultType]) {
+            const newValue = results[resultType];
+            if (element.innerText !== newValue) {
+              element.innerText = newValue;
+              resultsUpdated = true;
+            }
+          }
+        });
+
+        // Show alert if results changed
+        if (resultsUpdated) {
+          showAlert();
+        }
+      }, 500)
+    );
+  });
+
+  // Calculate initial values
+  calculateHELOCQualification();
+  setInitialCalculationComplete();
 });

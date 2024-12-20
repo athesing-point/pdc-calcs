@@ -1,4 +1,8 @@
+import createAlertHandler from "../shared/alert.js";
+
 document.addEventListener("DOMContentLoaded", () => {
+  const { showAlert, setInitialCalculationComplete } = createAlertHandler();
+
   const drawAmountInput = document.querySelector("#draw-amount");
   const interestRateInput = document.querySelector("#interest-rate");
   const calcButton = document.querySelector('[calc-input="calc_button"]');
@@ -37,8 +41,16 @@ document.addEventListener("DOMContentLoaded", () => {
     interestPayment = Math.round(interestPayment);
     totalPayment = Math.round(totalPayment);
 
-    document.querySelector("[calc-result='interest-payment']").innerText = formatCurrency(interestPayment);
-    document.querySelector("[calc-result='total-payment']").innerText = formatCurrency(totalPayment);
+    // Update results with alert
+    const newMonthlyPayment = formatCurrency(monthlyRepayment);
+    const newTotalInterest = formatCurrency(interestPayment);
+    const newTotalCost = formatCurrency(totalPayment);
+
+    if (document.querySelector("[calc-result='interest-payment']").innerText !== newTotalInterest || document.querySelector("[calc-result='total-payment']").innerText !== newTotalCost) {
+      document.querySelector("[calc-result='interest-payment']").innerText = newTotalInterest;
+      document.querySelector("[calc-result='total-payment']").innerText = newTotalCost;
+      showAlert();
+    }
   };
 
   const debounce = (func, delay) => {
@@ -158,4 +170,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Run calculation for default values when the page loads
   calculatePayments();
+  setInitialCalculationComplete();
 });

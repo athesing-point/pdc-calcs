@@ -1,0 +1,22 @@
+{
+  "name": "@point/calculators",
+  "version": "1.0.0",
+  "description": "Point.com financial calculators",
+  "main": "index.js",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./home-appreciation": "./home-appreciation/calc.js",
+    "./heloc-interest": "./heloc-interest/calc.js",
+    "./heloc-qualification": "./heloc-qual-calc/heloc-qualification-calc.js",
+    "./heloc-vs-refi": "./heloc-vs-refi/calc.js"
+  },
+  "files": [
+    "index.js",
+    "shared/",
+    "home-appreciation/",
+    "heloc-interest/",
+    "heloc-qual-calc/",
+    "heloc-vs-refi/"
+  ]
+}

@@ -1,4 +1,9 @@
+import createAlertHandler from "../shared/alert.js";
+
 document.addEventListener("DOMContentLoaded", () => {
+  // Alert handler
+  const { showAlert, setInitialCalculationComplete } = createAlertHandler();
+
   // Input elements
   const homeValueInput = document.querySelector('[calc-input="home-value"]');
   const currentMortgagePrincipalInput = document.querySelector('[calc-input="mortgage-principal"]');
@@ -78,7 +83,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const savings = cashRefiOptionCost - helocOptionCost;
     console.log(`Savings: ${savings}`);
 
-    savingsAmountElement.innerText = `$${formatCurrency(Math.abs(savings))}`;
+    if (savingsAmountElement) {
+      const newSavingsAmount = formatCurrency(Math.round(Math.abs(savings)));
+      if (savingsAmountElement.textContent !== newSavingsAmount) {
+        savingsAmountElement.textContent = newSavingsAmount;
+        showAlert();
+      }
+    }
     savingsPercentElement.innerText = formatPercentage((Math.abs(savings) / Math.max(helocOptionCost, cashRefiOptionCost)) * 100);
     helocAPRElement.innerText = formatPercentage(helocAPR * 100);
 
@@ -252,6 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loanAmountInput.value = formatCurrency(100000);
   // Run calculation for default values when the page loads
   calculateSavings();
+  setInitialCalculationComplete();
 });
 
 // Add this new function to calculate the remaining balance
