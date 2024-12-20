@@ -57,7 +57,7 @@ const initializeHomeAppreciationCalculator = () => {
   };
 
   // Calculate appreciation
-  const calculateAppreciation = () => {
+  const calculateAppreciation = (forceAlert = false) => {
     const homeValue = parseFormattedNumber(homeValueInput?.value || "0");
     const years = parseInt(yearsSelect?.value || "0");
     const growthRate = parseFloat(growthRateSelect?.value || "0");
@@ -81,7 +81,7 @@ const initializeHomeAppreciationCalculator = () => {
     if (futureValueResult) {
       const newFutureValue = formatResultCurrency(futureValue);
       futureValueResult.textContent = newFutureValue;
-      if (prevFutureValue !== newFutureValue) {
+      if (forceAlert || prevFutureValue !== newFutureValue) {
         showAlert("Results updated");
       }
     }
@@ -146,7 +146,7 @@ const initializeHomeAppreciationCalculator = () => {
   if (calcButton) {
     calcButton.addEventListener("click", (e) => {
       e.preventDefault();
-      calculateAppreciation();
+      calculateAppreciation(true);
     });
   }
 
