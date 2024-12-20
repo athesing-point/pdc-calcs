@@ -1,8 +1,13 @@
+import createAlertHandler from "https://cdn.jsdelivr.net/gh/athesing-point/pdc-calcs@173a5d44/shared/alert.min.js";
+
 // Constants
 const PERSONAL_LOAN_ORIGINATION_FEE = 0.05; // 5% origination fee for personal loans
 const DEFAULT_INTEREST_RATE = 12.4; // 12.42% National average interest rate for personal loans (Source: Bankrate.com)
 const DEFAULT_LOAN_AMOUNT = 100000; // $50,000 default loan amount
 const DEFAULT_LOAN_TERM = 60; // 60 months (5 years) default loan term
+
+// Initialize alert handler
+const { showAlert, setInitialCalculationComplete } = createAlertHandler();
 
 // DOM Elements
 const drawAmountInput = document.getElementById("draw-amount");
@@ -57,10 +62,24 @@ function calculateLoan() {
   // Calculate total cost
   const totalCost = loanAmountWithFee + totalInterest;
 
+  // Store previous values
+  const prevMonthly = resultMonthly.textContent;
+  const prevInterest = resultInterest.textContent;
+  const prevTotal = resultTotal.textContent;
+
   // Update results with rounding to whole dollars
-  resultMonthly.textContent = formatCurrency(Math.round(monthlyPayment));
-  resultInterest.textContent = formatCurrency(Math.round(totalInterest));
-  resultTotal.textContent = formatCurrency(Math.round(totalCost));
+  const newMonthly = formatCurrency(Math.round(monthlyPayment));
+  const newInterest = formatCurrency(Math.round(totalInterest));
+  const newTotal = formatCurrency(Math.round(totalCost));
+
+  resultMonthly.textContent = newMonthly;
+  resultInterest.textContent = newInterest;
+  resultTotal.textContent = newTotal;
+
+  // Show alert if values changed
+  if (prevMonthly !== newMonthly || prevInterest !== newInterest || prevTotal !== newTotal) {
+    showAlert();
+  }
 
   // Generate amortization table
   generateAmortizationTable(loanAmountWithFee, interestRate, loanTermMonths, monthlyPayment);
@@ -163,6 +182,7 @@ function formatInputField(input) {
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("input[input-format]").forEach(formatInputField);
   calculateLoan();
+  setInitialCalculationComplete();
 });
 
 // Update the existing event listener for the interest rate input
